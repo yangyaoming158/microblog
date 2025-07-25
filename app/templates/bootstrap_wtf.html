@@ -1,0 +1,95 @@
+{% macro form_field(field, autofocus) %}
+  {# 1. 检查字段类型是否是 BooleanField (复选框) #}
+  {%- if field.type == 'BooleanField' %}
+  <div class="form-check mb-3">
+    {{ field(class='form-check-input') }}
+    {{ field.label(class='form-check-label') }}
+  </div>
+  
+  {# 2. 检查字段类型是否是 RadioField (单选按钮组) #}
+  {%- elif field.type == 'RadioField' %}
+    {{ field.label(class='form-label') }}
+    {%- for item in field %} {# 遍历每个单选按钮 #}
+    <div class="form-check{% if loop.last %} mb-3{% endif %}">
+      {{ item(class='form-check-input') }}
+      {{ item.label(class='form-check-label') }}
+    </div>
+    {%- endfor %}
+    
+  {# 3. 检查字段类型是否是 SelectField (下拉选择框) #}
+  {%- elif field.type == 'SelectField' %}
+    {{ field.label(class='form-label') }}
+    {{ field(class='form-select mb-3') }}
+    
+  {# 4. 检查字段类型是否是 TextAreaField (多行文本框) #}
+  {%- elif field.type == 'TextAreaField' %}
+  <div class="mb-3">
+    {{ field.label(class='form-label') }}
+    {# - 根据 autofocus 参数决定是否添加 autofocus 属性 #}
+    {% if autofocus %}
+      {# - 动态添加 'is-invalid' 类，如果字段有错误 #}
+      {{ field(class='form-control' + (' is-invalid' if field.errors else ''), autofocus=True) }}
+    {% else %}
+      {{ field(class='form-control' + (' is-invalid' if field.errors else '')) }}
+    {% endif %}
+    {# - 循环显示该字段的所有错误信息 #}
+    {%- for error in field.errors %}
+    <div class="invalid-feedback">{{ error }}</div>
+    {%- endfor %}
+  </div>
+  
+  {# 5. 检查字段类型是否是 SubmitField (提交按钮) #}
+  {%- elif field.type == 'SubmitField' %}
+  {{ field(class='btn btn-primary mb-3') }}
+  
+  {# 6. else 分支：处理所有其他类型的字段 (如 StringField, PasswordField, EmailField 等) #}
+  {%- else %}
+  <div class="mb-3">
+    {# - 这段逻辑和 TextAreaField 完全一样，渲染标准的输入框 #}
+    {{ field.label(class='form-label') }}
+    {% if autofocus %}
+      {{ field(class='form-control' + (' is-invalid' if field.errors else ''), autofocus=True) }}
+    {% else %}
+      {{ field(class='form-control' + (' is-invalid' if field.errors else '')) }}
+    {% endif %}
+    {%- for error in field.errors %}
+    <div class="invalid-feedback">{{ error }}</div>
+    {%- endfor %}
+  </div>
+  {%- endif %}
+{% endmacro %}
+
+{% macro quick_form(form, action="", method="post", id="", novalidate=False) %}
+{# 1. 渲染 <form> 标签，并动态设置其属性 #}
+<form
+  {%- if action != None %} action="{{ action }}"{% endif -%}
+  {%- if method %} method="{{ method }}"{% endif %}
+  {%- if id %} id="{{ id }}"{% endif %}
+  {%- if novalidate %} novalidate{% endif %}>
+  
+  {# 2. 渲染隐藏字段，特别是 CSRF 令牌 #}
+  {{ form.hidden_tag() }}
+  
+  {# 3. (高级) 专门处理可能附加在隐藏字段上的全局错误 #}
+  {%- for field, errors in form.errors.items() %}
+    {%- if form[field].widget.input_type == 'hidden' %}
+      {%- for error in errors %}
+      <div class="invalid-feedback">{{ error }}</div>
+      {%- endfor %}
+    {%- endif %}
+  {%- endfor %}
+
+  {# 4. 【核心】遍历表单中的所有字段，并为它们调用 form_field 宏 #}
+  {# - `namespace` 是一个 Jinja2 的技巧，用来创建一个可以在循环内部被修改的变量 #}
+  {% set ns = namespace(first_field=true) %}
+  {%- for field in form %}
+    {# - 只渲染那些不是隐藏字段的字段 #}
+    {% if field.widget.input_type != 'hidden' -%}
+      {# - 调用工人宏，并把 `first_field` 标志传给它 #}
+      {{ form_field(field, ns.first_field) }}
+      {# - 在渲染完第一个字段后，立刻将标志设为 false #}
+      {% set ns.first_field = false %}
+    {%- endif %}
+  {%- endfor %}  
+</form>
+{% endmacro %}

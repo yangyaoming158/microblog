@@ -1,0 +1,49 @@
+<table class="table table-hover">
+        <tr>
+            <td width="70px">
+                <a href="{{ url_for('user', username=post.author.username) }}"> <!-- 使得点击头像也可以进入用户的主页 -->
+                    <img src="{{ post.author.avatar(70) }}" />
+                </a>
+            </td>
+            <td>
+                <!--这个技巧的核心是【分层处理】。它使用 set 指令，
+                先在模板层面将所有复杂的、包含 HTML 和 url_for 调用的动态部分【预渲染】成一个纯粹的 HTML 字符串变量。
+                然后，再将这个干净的 HTML 字符串变量，作为一个普通的参数，传递给一个只包含纯文本和占位符的翻译函数。
+                这完美地实现了“在翻译文本中安全地嵌入富文本链接”的目标，同时保持了待翻译文本的纯净和翻译流程的健壮性。
+                -->
+                {% set user_link %}
+                    <a href="{{ url_for('user', username=post.author.username) }}">
+                        {{ post.author.username }}
+                    </a>
+                {% endset %}
+                <!-- 使用 Flask-Moment 将 UTC 时间转换为本地化时间对应的距离当前时间长度 (例如: July 20, 2025 10:30 PM) -->
+                {{ _('%(username)s said %(when)s',
+                    username=user_link, when=moment(post.timestamp).fromNow()) }}
+                <br>
+                <span id="post{{ post.id }}">{{ post.body }}</span>
+                {% if post.language and post.language != g.locale %}
+                <br><br>
+                <!-- 这是一个 span 元素，它的作用是作为一个【容器】 -->
+                <!-- id="translation{{ post.id }}":
+                    - 我们给这个容器一个唯一的 ID，比如 "translation5"。
+                    - 这样，我们的 JavaScript 代码在收到翻译结果后，就能精确地找到这个容器，
+                    并把它的内容（也就是下面的 <a> 链接）替换成翻译好的文本。
+                -->
+                <span id="translation{{ post.id }}">
+                    <!-- 这是一个超链接 a 元素，但它的作用不是跳转，而是作为可点击的“按钮”
+                     - 当这个链接被点击时，不要去跳转到一个新的网页，而是去执行后面跟着的这段 JavaScript 代码(传参到base文件中的translate函数) 
+                     - 第一个参数 (sourceElem): 帖子的源文本元素的 ID。
+                     - 第二个参数 (destElem): 翻译结果要被插入的目标容器的 ID。
+                     - 第三个参数 (sourceLang): 帖子的源语言代码。（spa）
+                     - 第四个参数 (destLang): 当前用户的目标语言代码。（zh）
+                     -->
+                    <a href="javascript:translate(
+                                'post{{ post.id }}',
+                                'translation{{ post.id }}',
+                                '{{ post.language }}',
+                                '{{ g.locale }}');">{{ _('Translate') }}</a>
+                </span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>

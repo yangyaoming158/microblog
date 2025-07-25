@@ -1,0 +1,91 @@
+<!-- 继承自 base.html，获取网站的通用布局（如导航栏、页脚等） -->
+{% extends "base.html" %}
+
+<!-- 定义名为 'content' 的区块，这里的内容将被插入到 base.html 中对应的 block 位置 -->
+{% block content %}
+    <!-- 使用 Bootstrap 的 'table' 和 'table-hover' 类来创建一个带悬停效果的表格，用于布局 -->
+    <table class="table table-hover">
+        <!-- 表格行，valign="top" 确保单元格内容垂直顶部对齐 -->
+        <tr valign="top">
+            <!-- 左侧单元格，用于显示用户头像，固定宽度 -->
+            <td width="256px"><img src="{{ user.avatar(256) }}"></td>
+            <!-- 右侧单元格，用于显示用户信息 -->
+            <td>
+                <!-- 显示用户名 -->
+                <h1>{{ _('User') }}: {{ user.username }}</h1>
+                <!-- 如果用户填写了“关于我”，则显示该段落 -->
+                {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
+                <!-- 如果用户的“上次在线”时间存在 -->
+                {% if user.last_seen %}
+                <!-- 使用 Flask-Moment 将 UTC 时间转换为用户友好的、本地化的格式 (例如: July 20, 2025 10:30 PM) -->
+                <p>{{ _('Last seen on') }}: {{ moment(user.last_seen).format('LLL') }}</p>
+                {% endif %}
+                <!-- 调用 User 模型的自定义方法，显示粉丝数和关注数 -->
+                <p>{{ _('%(count)d followers', count=user.followers_count()) }}, {{ _('%(count)d following', count=user.following_count()) }}</p>
+
+                <!-- 
+                  【核心条件渲染逻辑】
+                  根据当前登录用户 (current_user) 和正在查看的用户 (user) 的关系，
+                  来决定显示哪个按钮/链接。
+                -->
+                {% if user == current_user %}
+                    <!-- 1. 如果正在查看自己的个人资料 -->
+                    <p><a href="{{ url_for('edit_profile') }}">{{ _('Edit your profile') }}</a></p>
+                {% elif not current_user.is_following(user) %}
+                    <!-- 2. 如果正在查看别人的资料，并且【尚未】关注此人 -->
+                    <p>
+                        <!-- 显示“关注”表单 -->
+                        <form action="{{ url_for('follow', username=user.username) }}" method="post">
+                            {{ form.hidden_tag() }} <!-- 包含 CSRF 令牌以保证安全 -->
+                            <!-- 渲染提交按钮，设置按钮文本为 'Follow'，并应用 Bootstrap 的按钮样式 -->
+                            {{ form.submit(value=_('Follow'), class_='btn btn-primary') }}
+                        </form>
+                    </p>
+                {% else %}
+                    <!-- 3. 如果正在查看别人的资料，并且【已经】关注了此人 -->
+                    <p>
+                        <!-- 显示“取消关注”表单 -->
+                        <form action="{{ url_for('unfollow', username=user.username) }}" method="post">
+                            {{ form.hidden_tag() }}
+                            {{ form.submit(value=_('Unfollow'), class_='btn btn-primary') }}
+                        </form>
+                    </p>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+    <!-- 遍历从后端视图函数传递过来的 'posts' 列表 -->
+    {% for post in posts %}
+        <!-- 
+          使用 'include' 语句，将显示单个帖子的逻辑复用到一个子模板中。
+          这使得代码更整洁，因为帖子在多个页面（主页、发现页、个人资料页）的显示方式是相同的。
+          每次循环，都会把当前的 'post' 对象传递给 '_post.html' 子模板。
+        -->
+        {% include '_post.html' %}
+    {% endfor %}
+
+    <!-- 分页导航部分 -->
+    <nav aria-label="Post navigation">
+        <!-- 使用 Bootstrap 的 'pagination' 类来创建分页样式 -->
+        <ul class="pagination">
+            <!-- “上一页” (较新的帖子) 按钮 -->
+            <!-- 
+              如果 prev_url 不存在 (即，当前是第一页)，则给 li 标签添加 'disabled' 类，
+              Bootstrap 会让这个按钮变灰且不可点击。
+            -->
+            <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                <!-- 链接指向由后端计算好的 prev_url -->
+                <a class="page-link" href="{{ prev_url or '#' }}"> <!-- or '#' 避免 href 为空 -->
+                    <span aria-hidden="true">←</span> {{ _('Newer posts') }}
+                </a>
+            </li>
+            <!-- “下一页” (较旧的帖子) 按钮 -->
+            <li class="page-item{% if not next_url %} disabled{% endif %}">
+                <a class="page-link" href="{{ next_url or '#' }}">
+                    {{ _('Older posts') }} <span aria-hidden="true">→</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

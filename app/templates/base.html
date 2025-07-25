@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+    <head>
+    <!-- 1. 基本的元标签 (Meta Tags) -->
+    <meta charset="utf-8"> <!-- 定义字符编码为 UTF-8，确保中文等非英文字符正确显示 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 响应式设计的关键！
+                                                                    告诉浏览器页面的宽度应等于设备的宽度，
+                                                                    初始缩放比例为1。这是移动端优先的基础。-->
+    
+    <!-- 2. 动态页面标题 (Dynamic Title) -->
+    {% if title %}
+        <!-- 如果后端视图函数传递了 'title' 变量，就使用它 -->
+        <title>{{ title }} - Microblog</title>
+    {% else %}
+        <!-- 否则，使用一个默认的标题 -->
+        <title>{{ _('Welcome to Microblog') }}</title>
+    {% endif %}
+    
+    <!-- 3. 引入 Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-..."
+        crossorigin="anonymous">
+        <!-- href: 指向 Bootstrap 托管在 CDN 上的 CSS 文件。这个文件包含了所有的样式规则。 -->
+        <!-- rel="stylesheet": 告诉浏览器这是一个样式表。 -->
+        <!-- integrity & crossorigin: 用于增强安全性 (子资源完整性)，确保你加载的文件没有被篡改。 -->
+    </head>
+  <body>
+    <!-- 1. 导航栏容器 -->
+    <!--    .navbar: 基础导航栏类 -->
+    <!--    .navbar-expand-lg: 核心响应式行为。意思是“在大型(lg)屏幕及以上，展开导航栏；
+                            在小于大型屏幕时（如平板和手机），折叠它。” -->
+    <!--    .bg-body-tertiary: 一个 Bootstrap 预设的、轻微的背景色。 -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <!-- 2. 内部容器 -->
+      <div class="container">
+        <!-- 3. 网站品牌/Logo -->
+        <a class="navbar-brand" href="{{ url_for('index') }}">Microblog</a>
+        <!-- 4. 汉堡菜单按钮 (移动端) -->
+        <!--    这个按钮在小屏幕上才会显示。点击时，它会展开/折叠下面的 #navbarSupportedContent 区域。 -->
+        <!--    data-bs-toggle, data-bs-target 等是 Bootstrap JavaScript 需要的属性。-->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- 5. 可折叠的导航链接区域 -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <!-- a. 左侧链接 -->
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="{{ url_for('index') }}">{{ _('Home') }}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="{{ url_for('explore') }}">{{ _('Explore') }}</a>
+            </li>
+          </ul>
+          <!-- b. 右侧链接 -->
+          <!--    'me-auto' (margin-end: auto) 把这部分推到了最右边 -->
+          <ul class="navbar-nav mb-2 mb-lg-0">
+            {% if current_user.is_anonymous %}
+            <!-- 如果用户未登录，显示登录链接 -->
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="{{ url_for('login') }}">{{ _('Login') }}</a>
+            </li>
+            {% else %}
+            <!-- 如果用户已登录，显示个人资料和登出链接 -->
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="{{ url_for('user', username=current_user.username) }}">{{ _('Profile') }}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="{{ url_for('logout') }}">{{ _('Logout') }}</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- 1. 主内容容器 -->
+    <!--    .container: 限制内容最大宽度并居中。 -->
+    <!--    .mt-3: 在容器顶部添加一些外边距，让它和导航栏之间有空隙。 -->
+    <div class="container mt-3">
+        <!-- 2. 显示闪现消息 (Flashed Messages) -->
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+        <!-- 使用 Bootstrap 的 'alert' 和 'alert-info' 类来渲染一个漂亮的蓝色提示框。 -->
+        <div class="alert alert-info" role="alert">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      {% endwith %}
+      <!-- 3. 【核心】内容占位符 -->
+      <!--    这是 Jinja2 的模板继承核心。所有继承自这个 base.html 的子模板
+        (如 index.html, login.html) 的内容，都将被插入到这个 block 里面。 -->
+      {% block content %}{% endblock %}
+    </div>
+    <!-- 4. 引入 Bootstrap JavaScript -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous">
+    </script>
+    <!-- 这个 JS 文件是必需的，用来驱动导航栏的折叠/展开、下拉菜单、弹窗等交互功能。-->
+     {{ moment.include_moment() }}
+      <!-- 手动从 CDN 加载中文语言包 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/zh-cn.js"></script>
+    <!-- 然后再设置时间语言 -->
+     {{ moment.lang(g.locale) }}
+
+    <script> 
+
+    // 1. 定义一个名为 'translate' 的异步函数
+    //    - async: 这个关键字表示该函数内部可以包含 'await' 操作，它会自动处理异步流程。
+    //    - 它接收四个参数，这些参数将由 HTML 中的 onclick 事件在调用时传入。
+    //      - sourceElem: 源文本元素的 ID 字符串 (例如: 'post5')
+    //      - destElem:   目标容器元素的 ID 字符串 (例如: 'translation5')
+    //      - sourceLang: 源语言代码 (例如: 'es')
+    //      - destLang:   目标语言代码 (例如: 'zh')
+    async function translate(sourceElem, destElem, sourceLang, destLang) {
+
+        // 2. 提供即时反馈：显示“加载中”动画
+        //    - document.getElementById(destElem): 在整个 HTML 页面中，找到 ID 为 destElem ('translation5') 的那个 <span> 元素。
+        //    - .innerHTML = '...': 将这个 <span> 元素【内部的 HTML 内容】完全替换成一个新的 <img> 标签。
+        //      - url_for(...): 这部分在服务器端已经被 Jinja2 渲染成了真实的图片路径，如 '/static/loading.gif'。
+        //    - 效果：用户一点击“翻译”，原来的“翻译”链接就立刻消失，变成了一个旋转的加载动画，用户体验很好。
+        document.getElementById(destElem).innerHTML = 
+          '<img src="{{ url_for('static', filename='loading.gif') }}">';
+
+        // 3. 使用 fetch API 向后端发送异步请求
+        //    - const response = await fetch(...): 
+        //      - fetch(): 这是浏览器内置的、用于发送网络请求的现代函数。
+        //      - await: 暂停函数的执行，直到 fetch() 完成网络请求并返回一个响应对象 (response) 后，再继续向下执行。
+        //        这使得异步代码写起来像同步代码一样直观。
+        const response = await fetch('/translate', {
+          // a. 请求的方法：POST
+          method: 'POST',
+          
+          // b. 请求头 (Headers):
+          //    告诉服务器我们发送的数据是什么格式。
+          headers: {'Content-Type': 'application/json; charset=utf-8'},
+          
+          // c. 请求体 (Body):
+          //    这里包含了我们要发送给后端的核心数据。
+          body: JSON.stringify({ // JSON.stringify() 将一个 JavaScript 对象转换成 JSON 格式的字符串。
+            
+            // 从源元素中获取要翻译的文本
+            text: document.getElementById(sourceElem).innerText, 
+            
+            // 传入从 onclick 中获取的源语言和目标语言
+            source_language: sourceLang,
+            dest_language: destLang
+          })
+        });
+
+        // 4. 解析后端返回的 JSON 响应
+        //    - const data = await response.json();
+        //      - response.json(): 这是响应对象的一个方法，它会读取响应体并将其解析为一个 JavaScript 对象。
+        //      - await: 再次暂停，直到 JSON 解析完成。
+        //      - data 变量现在是一个 JavaScript 对象，形如 { text: "翻译好的文本" }。
+        const data = await response.json();
+        
+        // 5. 将翻译结果更新到页面上
+        //    - document.getElementById(destElem): 再次找到那个目标 <span> 容器。
+        //    - .innerText = data.text: 将这个 <span> 元素【内部的文本内容】替换成从服务器返回的翻译结果。
+        //      - innerText 会自动处理 HTML 转义，比 innerHTML 更安全。
+        //    - 效果：加载动画消失，取而代之的是翻译好的文本。
+        document.getElementById(destElem).innerText = data.text;
+    }
+    </script>
+    </script>
+  </body>
+</html>

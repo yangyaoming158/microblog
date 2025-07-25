@@ -1,0 +1,17 @@
+它们如何协同工作 (整个流程)
+你在终端运行 flask run (并设置了 FLASK_APP=microblog.py)。
+Flask 加载 microblog.py。
+microblog.py 执行 from app import app，这触发了 app/__init__.py 的加载。
+app/__init__.py 创建了 app = Flask(__name__) 这个核心对象。
+然后，app/__init__.py 在末尾执行 from app import routes，触发了 app/routes.py 的加载。
+app/routes.py 被加载时，它里面所有的 @app.route 装饰器都会执行，将 URL (/ 和 /index) 和 index() 函数在 app 对象内部注册、关联起来。
+所有初始化完成，Flask 服务器开始等待请求。
+当你的浏览器访问 http://127.0.0.1:5000/ 时，Flask 在其注册的路由表中找到了匹配项，于是调用了 index() 函数。
+index() 函数返回 "Hello, World!"。
+Flask 将这个字符串作为响应发送给浏览器。
+
+
+对于翻译问题：如果后续python文件以及html文件持续更新了文本内容，则需要翻译跟进迭代，以下两个指令是迭代指令：
+pybabel extract -F babel.cfg -k _l -o messages.pot .
+pybabel update -i messages.pot -d app/translations
+该指令并不会破坏原有的已经翻译的内容，而是保留该内容并合并新的内容。
