@@ -30,12 +30,12 @@
                 -->
                 {% if user == current_user %}
                     <!-- 1. 如果正在查看自己的个人资料 -->
-                    <p><a href="{{ url_for('edit_profile') }}">{{ _('Edit your profile') }}</a></p>
+                    <p><a href="{{ url_for('main.edit_profile') }}">{{ _('Edit your profile') }}</a></p>
                 {% elif not current_user.is_following(user) %}
                     <!-- 2. 如果正在查看别人的资料，并且【尚未】关注此人 -->
                     <p>
                         <!-- 显示“关注”表单 -->
-                        <form action="{{ url_for('follow', username=user.username) }}" method="post">
+                        <form action="{{ url_for('main.follow', username=user.username) }}" method="post">
                             {{ form.hidden_tag() }} <!-- 包含 CSRF 令牌以保证安全 -->
                             <!-- 渲染提交按钮，设置按钮文本为 'Follow'，并应用 Bootstrap 的按钮样式 -->
                             {{ form.submit(value=_('Follow'), class_='btn btn-primary') }}
@@ -45,7 +45,7 @@
                     <!-- 3. 如果正在查看别人的资料，并且【已经】关注了此人 -->
                     <p>
                         <!-- 显示“取消关注”表单 -->
-                        <form action="{{ url_for('unfollow', username=user.username) }}" method="post">
+                        <form action="{{ url_for('main.unfollow', username=user.username) }}" method="post">
                             {{ form.hidden_tag() }}
                             {{ form.submit(value=_('Unfollow'), class_='btn btn-primary') }}
                         </form>

@@ -36,7 +36,7 @@
       <!-- 2. 内部容器 -->
       <div class="container">
         <!-- 3. 网站品牌/Logo -->
-        <a class="navbar-brand" href="{{ url_for('index') }}">Microblog</a>
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">Microblog</a>
         <!-- 4. 汉堡菜单按钮 (移动端) -->
         <!--    这个按钮在小屏幕上才会显示。点击时，它会展开/折叠下面的 #navbarSupportedContent 区域。 -->
         <!--    data-bs-toggle, data-bs-target 等是 Bootstrap JavaScript 需要的属性。-->
@@ -48,10 +48,10 @@
           <!-- a. 左侧链接 -->
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{{ url_for('index') }}">{{ _('Home') }}</a>
+              <a class="nav-link" aria-current="page" href="{{ url_for('main.index') }}">{{ _('Home') }}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{{ url_for('explore') }}">{{ _('Explore') }}</a>
+              <a class="nav-link" aria-current="page" href="{{ url_for('main.explore') }}">{{ _('Explore') }}</a>
             </li>
           </ul>
           <!-- b. 右侧链接 -->
@@ -60,15 +60,15 @@
             {% if current_user.is_anonymous %}
             <!-- 如果用户未登录，显示登录链接 -->
             <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{{ url_for('login') }}">{{ _('Login') }}</a>
+              <a class="nav-link" aria-current="page" href="{{ url_for('auth.login') }}">{{ _('Login') }}</a>
             </li>
             {% else %}
             <!-- 如果用户已登录，显示个人资料和登出链接 -->
             <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{{ url_for('user', username=current_user.username) }}">{{ _('Profile') }}</a>
+              <a class="nav-link" aria-current="page" href="{{ url_for('main.user', username=current_user.username) }}">{{ _('Profile') }}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{{ url_for('logout') }}">{{ _('Logout') }}</a>
+              <a class="nav-link" aria-current="page" href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a>
             </li>
             {% endif %}
           </ul>
@@ -166,6 +166,6 @@
         document.getElementById(destElem).innerText = data.text;
     }
     </script>
-    </script>
+    
   </body>
 </html>

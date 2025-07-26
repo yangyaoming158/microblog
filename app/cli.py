@@ -1,6 +1,6 @@
 import os
 import click
-from app import app
+from flask import Blueprint
 
 # 本代码用于简化合并繁琐的翻译指令
 
@@ -8,11 +8,12 @@ from app import app
 # flask translate update 用于更新工程文件中出现的文本更新内容
 # flask translate compile 用于编译导入的新语言或者更新的内容
 
-@app.cli.group()
+bp = Blueprint('cli', __name__, cli_group=None)
+
+@bp.cli.group()
 def translate():
     """Translation and localization commands."""
     pass
-
 
 @translate.command()
 @click.argument('lang')
