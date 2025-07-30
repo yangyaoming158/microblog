@@ -1,0 +1,21 @@
+# Virtual Environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local environment variables
+.flaskenv
+.env
+
+# Local database file
+app.db
+
+# Translation files
+messages.pot
+app/translations/*/LC_MESSAGES/*.mo
+
+# IDE/Editor specific
+.vscode/
+.idea/
