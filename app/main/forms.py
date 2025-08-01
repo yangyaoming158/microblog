@@ -75,3 +75,7 @@ class SearchForm(FlaskForm):
         #      并将所有参数 (包括我们修改过的 kwargs) 传递给它，
         #      以完成表单的标准初始化流程。
         super(SearchForm, self).__init__(*args, **kwargs)
+
+class CommentForm(FlaskForm):
+    body = TextAreaField(_l('Comment'), validators=[DataRequired(), Length(min=1, max=140)])
+    submit = SubmitField(_l('Submit'))

@@ -7,10 +7,10 @@ import sqlalchemy as sa
 from langdetect import detect, LangDetectException
 from app import db
 from app.main.forms import EditProfileForm, EmptyForm, PostForm
-from app.models import User, Post
+from app.models import User, Post,Comment
 from app.translate import translate
 from app.main import bp
-from app.main.forms import SearchForm
+from app.main.forms import SearchForm,CommentForm
 
 
 # g 对象： 是 Flask 提供的一个“请求全局”的存储空间
@@ -90,8 +90,9 @@ def user(username):
     prev_url = url_for('main.user', username=user.username,
                        page=posts.prev_num) if posts.has_prev else None
     form = EmptyForm()
+    empty_form = EmptyForm()
     return render_template('user.html', user=user, posts=posts.items,
-                           next_url=next_url, prev_url=prev_url, form=form)
+                           next_url=next_url, prev_url=prev_url, form=form,empty_form=empty_form)
 
 
 @bp.route('/edit_profile', methods=['GET', 'POST'])
@@ -203,3 +204,95 @@ def search():
     return render_template('search.html', title=_('Search'), posts=posts,
                            next_url=next_url, prev_url=prev_url)
 
+
+@bp.route('/delete_post/<int:post_id>', methods=['POST'])
+@login_required
+def delete_post(post_id):
+    # 1. 根据传入的 post_id，从数据库中查询要删除的帖子。
+    #    使用 db.get_or_404() 是一个非常好的实践，如果找不到帖子，
+    #    它会自动返回一个 404 Not Found 错误页面。
+    post = db.get_or_404(Post, post_id)
+
+    # 2. 【核心安全检查】验证当前登录的用户是否是这篇帖子的作者。
+    #    这可以防止一个用户通过构造 URL 来删除别人的帖子！
+    if post.author != current_user:
+        # 如果不是作者，可以使用 abort() 来立即返回一个错误。
+        # 403 Forbidden 表示“禁止访问”。
+        from flask import abort
+        abort(403)
+
+    # 3. 如果验证通过，执行删除操作。
+    db.session.delete(post)
+    db.session.commit()
+    
+    # 4. 给出反馈，并重定向
+    flash(_('Your post has been deleted!'))
+    
+    # 将用户重定向回他/她自己的个人资料页面
+    return redirect(url_for('main.user', username=current_user.username))
+
+
+@bp.route('/add_comment/<int:post_id>', methods=['POST'])
+@login_required
+def add_comment(post_id):
+    form = CommentForm()
+    # 尝试从提交的表单数据中获取 parent_id，如果没有则为 None
+    parent_id = request.form.get('parent_id', type=int)
+
+    if form.validate_on_submit():
+        comment = Comment(
+            body=form.body.data,
+            author=current_user,
+            post_id=post_id,
+            parent_id=parent_id  # 设置父评论 ID
+        )
+        db.session.add(comment)
+        db.session.commit()
+        flash(_('Your comment has been published.'))
+    
+    # 无论成功与否，都重定向回原来的帖子页面
+    # request.referrer 是一个包含了用户是从哪个页面提交表单的 URL
+    return redirect(request.referrer or url_for('main.index'))
+
+@bp.route('/post/<int:post_id>', methods=['GET', 'POST'])
+@login_required
+def post(post_id):
+    # 1. 根据 ID 查询帖子，如果找不到则返回 404
+    post = db.get_or_404(Post, post_id)
+    
+    # 2. 创建一个用于发表新评论的表单
+    form = CommentForm()
+    
+    # 3. 处理表单提交 (POST 请求)
+    if form.validate_on_submit():
+        # 创建一个新的 Comment 对象
+        comment = Comment(
+            body=form.body.data,
+            author=current_user,
+            post=post  # 直接将 post 对象关联起来
+        )
+        db.session.add(comment)
+        db.session.commit()
+        flash(_('Your comment has been published.'))
+        
+        # 使用 Post/Redirect/Get 模式，重定向回同一个页面以避免重复提交
+        # url_for('main.post', ...) 会生成 /post/<post_id> 这样的 URL
+        return redirect(url_for('main.post', post_id=post.id))
+    
+    # 4. 获取并分页显示这篇帖子的所有评论 (GET 请求时)
+    page = request.args.get('page', 1, type=int)
+    # post.comments 是一个可查询对象，我们可以直接对其进行排序和分页
+    comments = db.paginate(
+        post.comments.select().order_by(Comment.timestamp.asc()),
+        page=page, per_page=10, error_out=False)
+        
+    # 5. 计算分页链接
+    next_url = url_for('main.post', post_id=post.id, page=comments.next_num) \
+        if comments.has_next else None
+    prev_url = url_for('main.post', post_id=post.id, page=comments.prev_num) \
+        if comments.has_prev else None
+    
+    # 6. 渲染模板，并把所有需要的数据都传递过去
+    return render_template('post_detail.html', title=post.body, post=post,
+                           comments=comments.items, form=form,
+                           next_url=next_url, prev_url=prev_url)

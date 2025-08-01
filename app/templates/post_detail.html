@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <!-- 1. 使用 _post.html 子模板来显示帖子本身的内容 -->
+    {% include '_post.html' %}
+
+    <hr>
+
+    <!-- 2. 显示发表新评论的表单 -->
+    <!-- 这个表单会 POST 到当前的 URL, 即 /post/<post_id> -->
+    <form action="" method="post">
+        {{ form.hidden_tag() }} <!-- CSRF 令牌 -->
+        <p>
+            {{ form.body.label }}<br>
+            {{ form.body(rows=4, class_='form-control') }}
+            <!-- 显示字段验证错误 -->
+            {% for error in form.body.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit(class_='btn btn-primary') }}</p>
+    </form>
+
+    <hr>
+    <h3>{{ _('Comments') }}</h3>
+    
+    <!-- 3. 显示评论列表 -->
+    <!-- 
+      遍历从后端传来的 'comments' 列表 (这是分页后的当页评论)
+      我们在这里可以创建一个新的子模板 _comment.html 来复用，也可以直接写
+    -->
+    {% for comment in comments %}
+    <div style="margin-top: 15px;">
+        <a href="{{ url_for('main.user', username=comment.author.username) }}">
+        <img src="{{ comment.author.avatar(36) }}" style="vertical-align: middle;">
+        </a>
+        <strong>
+            <a href="{{ url_for('main.user', username=comment.author.username) }}">
+                {{ comment.author.username }}
+            </a>
+        </strong>
+        <small>{{ moment(comment.timestamp).fromNow() }}</small>
+        <p>{{ comment.body }}</p>
+    </div>
+    {% endfor %}
+    
+    <!-- 4. 显示评论的分页导航 -->
+    <nav aria-label="Comment navigation">
+        <ul class="pagination">
+            <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                <a class="page-link" href="{{ prev_url or '#' }}">{{ _('Previous Comments') }}</a>
+            </li>
+            <li class="page-item{% if not next_url %} disabled{% endif %}">
+                <a class="page-link" href="{{ next_url or '#' }}">{{ _('Next Comments') }}</a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

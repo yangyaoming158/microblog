@@ -21,6 +21,12 @@
                     username=user_link, when=moment(post.timestamp).fromNow()) }}
                 <br>
                 <span id="post{{ post.id }}">{{ post.body }}</span>
+
+                <!-- 【新增/修改】在帖子正文下方添加一个永久链接 -->
+                <p>
+                    <a href="{{ url_for('main.post', post_id=post.id) }}">{{ _('comment zone') }}</a>
+                </p>
+                
                 {% if post.language and post.language != g.locale %}
                 <br><br>
                 <!-- 这是一个 span 元素，它的作用是作为一个【容器】 -->
@@ -43,6 +49,31 @@
                                 '{{ post.language }}',
                                 '{{ g.locale }}');">{{ _('Translate') }}</a>
                 </span>
+                {% endif %}
+                    <!-- 【在这里添加新的代码块】 -->
+                <!-- 
+                条件判断：只有当帖子的作者 (post.author)
+                是当前登录的用户 (current_user) 时，才显示“删除”按钮。
+                还要检查 empty_form 这个变量【是否存在】于当前的模板上下文中
+                因为我只想要在个人资料页面中显示删除选项
+                -->
+                {% if post.author == current_user and empty_form %}
+                <div>
+                    <!-- 
+                    使用一个【空表单】来包裹删除按钮，以实现安全的 POST 请求。
+                    这和我们实现“关注/取消关注”功能时用的技巧完全一样。
+                    -->
+                    <form action="{{ url_for('main.delete_post', post_id=post.id) }}" method="post">
+                        <!-- 
+                        【关键】我们需要一个 CSRF 令牌。
+                        但是，我们不能直接用 g.search_form，因为它可能不存在或不适用。
+                        一个简单的解决方案是，在处理帖子列表的视图函数 (index, explore, user) 中，
+                        也都创建一个 EmptyForm 的实例并传递给模板。
+                        -->
+                        {{ empty_form.hidden_tag() }}
+                        {{ empty_form.submit(value=_('Delete'), class_='btn btn-danger btn-sm') }}
+                    </form>
+                </div>
                 {% endif %}
             </td>
         </tr>

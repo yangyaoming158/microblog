@@ -42,6 +42,10 @@ class User(UserMixin, db.Model):
         secondary=followers, primaryjoin=(followers.c.followed_id == id),
         secondaryjoin=(followers.c.follower_id == id),
         back_populates='following')
+    
+    # 一个用户发表的所有评论
+    comments: so.WriteOnlyMapped['Comment'] = so.relationship(
+        back_populates='author', lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -246,9 +250,34 @@ class Post(SearchableMixin,db.Model):
 
     author: so.Mapped[User] = so.relationship(back_populates='posts')
 
+    # 一篇帖子下的所有评论
+    comments: so.WriteOnlyMapped['Comment'] = so.relationship(
+        back_populates='post', lazy='dynamic', cascade='all, delete-orphan')
+
     __searchable__ = ['body']
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)
     
+
+
+class Comment(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    body: so.Mapped[str] = so.mapped_column(sa.String(140))
+    timestamp: so.Mapped[datetime] = so.mapped_column(
+        index=True, default=lambda: datetime.now(timezone.utc))
+    
+    # --- 关系 ---
+    # 评论的作者
+    author_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id),
+                                                 index=True)
+    author: so.Mapped['User'] = so.relationship('User', back_populates='comments')
+    
+    # 这条评论是属于哪篇帖子的
+    post_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(Post.id),
+                                               index=True)
+    post: so.Mapped['Post'] = so.relationship('Post', back_populates='comments')
+
+    def __repr__(self):
+        return f'<Comment {self.body}>'
 
