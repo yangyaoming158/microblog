@@ -221,10 +221,10 @@ def delete_post(post_id):
         from flask import abort
         abort(403)
 
-    # 3. 如果验证通过，执行删除操作。
-    db.session.delete(post)
-    db.session.commit()
+       # 【调用封装好的方法】
+    Post.delete_post_with_dependencies(post_id)
     
+    db.session.commit() # 在视图层面统一提交
     # 4. 给出反馈，并重定向
     flash(_('Your post has been deleted!'))
     

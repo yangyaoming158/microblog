@@ -259,6 +259,21 @@ class Post(SearchableMixin,db.Model):
     def __repr__(self):
         return '<Post {}>'.format(self.body)
     
+    # 【新增】一个封装了删除逻辑的类方法
+    @classmethod
+    def delete_post_with_dependencies(cls, post_id):
+        post = db.get_or_404(cls, post_id)
+        
+        # 删除所有关联的评论
+        comments_query = sa.select(Comment).where(Comment.post_id == post.id)
+        comments = db.session.scalars(comments_query).all()
+        for comment in comments:
+            db.session.delete(comment)
+            
+        # 删除帖子本身
+        db.session.delete(post)
+        
+        # 注意：commit 留给调用者来做
 
 
 class Comment(db.Model):
