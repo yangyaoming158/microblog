@@ -232,27 +232,6 @@ def delete_post(post_id):
     return redirect(url_for('main.user', username=current_user.username))
 
 
-@bp.route('/add_comment/<int:post_id>', methods=['POST'])
-@login_required
-def add_comment(post_id):
-    form = CommentForm()
-    # 尝试从提交的表单数据中获取 parent_id，如果没有则为 None
-    parent_id = request.form.get('parent_id', type=int)
-
-    if form.validate_on_submit():
-        comment = Comment(
-            body=form.body.data,
-            author=current_user,
-            post_id=post_id,
-            parent_id=parent_id  # 设置父评论 ID
-        )
-        db.session.add(comment)
-        db.session.commit()
-        flash(_('Your comment has been published.'))
-    
-    # 无论成功与否，都重定向回原来的帖子页面
-    # request.referrer 是一个包含了用户是从哪个页面提交表单的 URL
-    return redirect(request.referrer or url_for('main.index'))
 
 @bp.route('/post/<int:post_id>', methods=['GET', 'POST'])
 @login_required
