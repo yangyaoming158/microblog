@@ -45,7 +45,7 @@ class User(UserMixin, db.Model):
     
     # 一个用户发表的所有评论
     comments: so.WriteOnlyMapped['Comment'] = so.relationship(
-        back_populates='author', lazy='dynamic', cascade='all, delete-orphan')
+        back_populates='author', lazy='dynamic', cascade='all, delete-orphan',passive_deletes=True)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -252,7 +252,7 @@ class Post(SearchableMixin,db.Model):
 
     # 一篇帖子下的所有评论
     comments: so.WriteOnlyMapped['Comment'] = so.relationship(
-        back_populates='post', lazy='dynamic', cascade='all, delete-orphan')
+        back_populates='post', lazy='dynamic', cascade='all, delete-orphan',passive_deletes=True)
 
     __searchable__ = ['body']
 
@@ -269,12 +269,12 @@ class Comment(db.Model):
     
     # --- 关系 ---
     # 评论的作者
-    author_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id),
+    author_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('user.id', ondelete='CASCADE'), 
                                                  index=True)
     author: so.Mapped['User'] = so.relationship('User', back_populates='comments')
     
     # 这条评论是属于哪篇帖子的
-    post_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(Post.id),
+    post_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('post.id', ondelete='CASCADE'),
                                                index=True)
     post: so.Mapped['Post'] = so.relationship('Post', back_populates='comments')
 

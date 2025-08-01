@@ -90,7 +90,7 @@ def user(username):
     prev_url = url_for('main.user', username=user.username,
                        page=posts.prev_num) if posts.has_prev else None
     form = EmptyForm()
-    empty_form = EmptyForm()
+    empty_form = EmptyForm() # 使用空模板来实现删除帖子按钮
     return render_template('user.html', user=user, posts=posts.items,
                            next_url=next_url, prev_url=prev_url, form=form,empty_form=empty_form)
 
