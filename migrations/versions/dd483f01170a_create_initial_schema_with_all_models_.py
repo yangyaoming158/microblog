@@ -1,8 +1,8 @@
-"""initial database schema
+"""Create initial schema with all models and cascades
 
-Revision ID: ea8cbda157f9
+Revision ID: dd483f01170a
 Revises: 
-Create Date: 2025-08-01 16:37:58.952887
+Create Date: 2025-08-02 01:06:09.274208
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ea8cbda157f9'
+revision = 'dd483f01170a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -57,8 +57,8 @@ def upgrade():
     sa.Column('timestamp', sa.DateTime(), nullable=False),
     sa.Column('author_id', sa.Integer(), nullable=False),
     sa.Column('post_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['author_id'], ['user.id'], ),
-    sa.ForeignKeyConstraint(['post_id'], ['post.id'], ),
+    sa.ForeignKeyConstraint(['author_id'], ['user.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['post_id'], ['post.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('comment', schema=None) as batch_op:
