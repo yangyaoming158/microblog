@@ -35,7 +35,7 @@
         <img src="{{ comment.author.avatar(36) }}" style="vertical-align: middle;">
         </a>
         <strong>
-            <a href="{{ url_for('main.user', username=comment.author.username) }}">
+            <a class="user_popup" href="{{ url_for('main.user', username=comment.author.username) }}">
                 {{ comment.author.username }}
             </a>
         </strong>

@@ -186,6 +186,116 @@
         //    - 效果：加载动画消失，取而代之的是翻译好的文本。
         document.getElementById(destElem).innerText = data.text;
     }
+
+    // 1. 定义一个用于初始化 popover 的函数
+      //    我们把所有初始化的逻辑都封装在这个函数里，保持代码整洁。
+    function initialize_popovers() {
+        // 1. 查找所有目标元素
+        //    - document.getElementsByClassName('user_popup'): 
+        //      在整个页面中，找到所有 class 包含了 'user_popup' 的 HTML 元素。
+        //      这会返回一个 HTMLCollection，它是一个类数组对象。
+        const popups = document.getElementsByClassName('user_popup');
+        
+        // 2. 遍历所有找到的链接
+        for (let i = 0; i < popups.length; i++) {
+            // 3. 为【每一个】链接创建一个新的 Popover 实例
+            const popover = new bootstrap.Popover(popups[i], {
+            // --- Popover 的配置选项 ---
+
+            // a. 初始内容
+            content: 'Loading...', // 弹窗刚出现时显示的占位文本
+            
+            // b. 触发方式
+            //    - 'hover': 鼠标悬停时触发
+            //    - 'focus': 元素获得焦点时触发 (例如通过 Tab 键)
+            trigger: 'hover focus',
+            
+            // c. 弹窗位置
+            placement: 'right', // 出现在触发元素的右侧
+            
+            // d. 内容类型
+            html: true, // 【关键】告诉 Bootstrap，'content' 属性里的是 HTML，而不是纯文本
+            
+            // e. 安全设置
+            sanitize: false, // 【关键】禁用 Bootstrap 内置的 HTML 清理功能。
+                            // 因为我们的 HTML 是由后端 Jinja2 安全生成的，所以这样做是安全的。
+            
+            // f. 延迟
+            //    - show: 500: 鼠标悬停【半秒 (500毫秒)】后才显示弹窗，防止用户只是不小心划过。
+            //    - hide: 0: 鼠标移开时立即隐藏，没有延迟。
+            delay: {show: 500, hide: 0},
+            
+            // g. 【核心技巧 #1】容器
+            //    - container: popups[i]: 
+            //      告诉 Bootstrap，不要把弹窗的 HTML 代码插入到 <body> 的末尾（默认行为），
+            //      而是把它插入到【触发链接 popups[i] 的内部】。
+            //      这使得“链接”和“弹窗”在 DOM 结构上变成了一个整体。
+            //      这是实现“鼠标可以从链接移入弹窗而弹窗不消失”的第一步。
+            container: popups[i],
+            
+            // h. 【核心技巧 #2】自定义 Class
+            //    - customClass: 'd-inline':
+            //      给弹窗最外层的 <div> 元素添加一个 Bootstrap 的 'd-inline' class。
+            //      这会改变它的 display 属性，防止它像一个块级元素那样强行换行，
+            //      从而破坏页面原有的布局。
+            customClass: 'd-inline',
+          });
+
+           // 2. 【核心】为“即将显示 (show)”事件添加一个监听器
+          //    - 'show.bs.popover': 这是 Bootstrap Popover 特有的一个事件。
+          //      它在 popover 被触发、正【准备】显示【之前】被触发。
+          //    - async (ev) => { ... }: 我们定义了一个异步的箭头函数来处理这个事件。
+          //      - 'ev' 是事件对象，ev.target 指向触发这个事件的元素（也就是那个 <a> 链接）。
+          popups[i].addEventListener('show.bs.popover', async (ev) => {
+            
+            // 3. 【优化】检查内容是否已经加载过
+            //    - 我们在链接元素上自定义了一个 'popupLoaded' 属性作为“缓存标记”。
+            //    - 如果这个标记为 true，说明我们已经为这个弹窗加载过内容了，
+            //      直接 return，不再发送重复的 Ajax 请求。
+            if (ev.target.popupLoaded) {
+              return;
+            }
+            
+            // 4. 【核心】发起 Ajax 请求获取弹窗内容
+            //    - ev.target.innerText.trim(): 从触发链接 (<a>) 中获取纯文本的用户名。
+            //    - fetch(...): 向我们之前创建的 /user/<username>/popup 路由发送一个 GET 请求。
+            const response = await fetch('/user/' + ev.target.innerText.trim() + '/popup');
+            //    - await response.text(): 获取服务器返回的 HTML 片段（注意这里是 .text() 而不是 .json()）。
+            const data = await response.text();
+            
+            // 5. 【核心】更新 Popover 的内容
+            //    - bootstrap.Popover.getInstance(ev.target):
+            //      通过触发元素，获取到与之关联的那个 Popover 对象实例。
+            const popover = bootstrap.Popover.getInstance(ev.target);
+            if (popover && data) { // 确保实例和数据都存在
+              // a. 设置“缓存标记”，表示内容已加载。
+              ev.target.popupLoaded = true;
+              // b. 【关键】调用 .setContent() 方法来动态更新弹窗内容。
+              //    - {'.popover-body': data}: 
+              //      这个语法告诉 Popover：“请找到这个弹窗内部的 .popover-body 元素，
+              //      然后把它的 HTML 内容替换成我从服务器获取的 'data' (HTML 片段)。”
+              popover.setContent({'.popover-body': data});
+              
+              // 6. 【细节】重新渲染 Flask-Moment 时间戳
+              //    - 因为我们动态插入的 HTML 片段中包含了由 moment() 生成的特殊 <span>，
+              //      它们需要被 JavaScript 再次处理才能显示成“几秒前”这样的格式。
+              //    - flask_moment_render_all() 就是 Flask-Moment 提供的、用于手动触发
+              //      全页时间戳重新渲染的函数。
+              setTimeout(function() {
+                  flask_moment_render_all();
+              }, 0);
+            }
+          });
+
+        }
+    }
+      
+      // 2. 将这个初始化函数注册为 DOMContentLoaded 事件的处理器
+      //    - document.addEventListener: 这是标准的、向文档添加事件监听器的方法。
+      //    - 'DOMContentLoaded': 指定我们要监听的事件名称。
+      //    - initialize_popovers: 指定当事件发生时，要调用的函数。
+      //      (注意：这里只传递函数名，不要加括号，因为我们不是要立即调用它)
+      document.addEventListener('DOMContentLoaded', initialize_popovers);
     </script>
     
   </body>

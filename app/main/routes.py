@@ -275,3 +275,12 @@ def post(post_id):
     return render_template('post_detail.html', title=post.body, post=post,
                            comments=comments.items, form=form,
                            next_url=next_url, prev_url=prev_url)
+
+#根据给定的 username，获取 user 对象
+#然后把它“填充”到一个专门为弹窗设计的、小巧的 HTML 模板中，并把最终生成的 HTML 片段作为响应返回
+@bp.route('/user/<username>/popup')
+@login_required
+def user_popup(username):
+    user = db.first_or_404(sa.select(User).where(User.username == username))
+    form = EmptyForm()
+    return render_template('user_popup.html', user=user, form=form)
