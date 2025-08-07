@@ -24,10 +24,12 @@
                 <span id="post{{ post.id }}">{{ post.body }}</span>
 
                 <!-- 【新增/修改】在帖子正文下方添加一个永久链接 -->
+                {% if show_comment_link is not defined or show_comment_link %}
                 <p>
                     <a href="{{ url_for('main.post', post_id=post.id) }}">{{ _('comment zone') }}</a>
                 </p>
-                
+                {% endif %}
+
                 {% if post.language and post.language != g.locale %}
                 <br><br>
                 <!-- 这是一个 span 元素，它的作用是作为一个【容器】 -->

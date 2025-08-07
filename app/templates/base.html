@@ -83,12 +83,24 @@
               <a class="nav-link" aria-current="page" href="{{ url_for('auth.login') }}">{{ _('Login') }}</a>
             </li>
             {% else %}
-            <!-- 如果用户已登录，显示个人资料和登出链接 -->
+            <!-- 如果用户已登录，显示个人资料、登出以及私信链接 -->
             <li class="nav-item">
               <a class="nav-link" aria-current="page" href="{{ url_for('main.user', username=current_user.username) }}">{{ _('Profile') }}</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" aria-current="page" href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page"
+                                href="{{ url_for('main.messages') }}">
+                            {{ _('Messages') }}
+                            {% set unread_message_count = current_user.unread_message_count() %}
+                            <span id="message_count" class="badge text-bg-danger"
+                                style="visibility: {% if unread_message_count %}visible
+                                                   {% else %}hidden{% endif %};">
+                                {{ unread_message_count }}
+                            </span>
+              </a>
             </li>
             
             {% endif %}
@@ -296,6 +308,50 @@
       //    - initialize_popovers: 指定当事件发生时，要调用的函数。
       //      (注意：这里只传递函数名，不要加括号，因为我们不是要立即调用它)
       document.addEventListener('DOMContentLoaded', initialize_popovers);
+
+
+      function set_message_count(n) {
+        // 1. 在整个 HTML 文档中，查找 ID 为 'message_count' 的那个元素。
+        //    这个元素通常是在 base.html 模板中，导航栏“消息”链接旁边的一个 <span> 标签。
+        const count_elem = document.getElementById('message_count');
+        
+        // 2. 将找到的元素的【内部文本内容】更新为传入的新数量 'n'。
+        //    例如，如果 n 是 3，这个 <span> 的文本就会变成 "3"。
+        count_elem.innerText = n;
+        
+        // 3. 根据新数量，动态地设置元素的【可见性】。
+        //    - 使用了一个三元条件运算符 (condition ? value_if_true : value_if_false)。
+        //    - 在 JavaScript 中，数字 0 会被当作 "false"，任何非零数字都会被当作 "true"。
+        //    - 如果 n 大于 0 (n 为 "true")，就将 CSS 的 'visibility' 属性设置为 'visible'，让徽章显示出来。
+        //    - 如果 n 等于 0 (n 为 "false")，就将 'visibility' 属性设置为 'hidden'，让徽章隐藏起来（但仍然占据空间）。
+        count_elem.style.visibility = n ? 'visible' : 'hidden';
+      }
+
+      {% if current_user.is_authenticated %}
+      function initialize_notifications() {
+        // 客户端 (JavaScript) 负责记住它收到的最后一条通知的时间戳。这个时间戳就是它的“书签”。
+        // 在每一次后续的轮询请求中，客户端都会把这个“书签” (since 参数) 发送给服务器。
+        // 服务器端 (Flask) 利用这个“书签”，只从数据库中查询比这个时间戳更新的通知。
+        // 这样，服务器永远不会返回客户端已经见过的旧通知，每次返回的要么是全新的通知列表，要么是一个空列表。
+        let since = 0;
+        // 每 10000 毫秒 (10秒) 执行一次
+        setInterval(async function() {
+          // 向 /notifications API 发送 GET 请求，并带上 'since' 参数
+          const response = await fetch('{{ url_for('main.notifications') }}?since=' + since);
+          const notifications = await response.json(); // 将 JSON 解析为 JavaScript 数组
+          // 遍历返回的新通知
+          for (let i = 0; i < notifications.length; i++) {
+            // 根据通知的 name，执行不同的前端操作
+            if (notifications[i].name == 'unread_message_count')
+              set_message_count(notifications[i].data);
+            // 更新 'since' 为最后一条通知的时间戳，以便下次只请求更新的
+            since = notifications[i].timestamp;
+          }
+        }, 10000);
+      }
+      // 页面加载后，开始轮询
+      document.addEventListener('DOMContentLoaded', initialize_notifications);
+      {% endif %}
     </script>
     
   </body>

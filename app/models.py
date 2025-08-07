@@ -7,7 +7,7 @@ import sqlalchemy.orm as so
 from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
+import jwt,json
 from app import db, login
 from app.search import add_to_index, remove_from_index, query_index
 
@@ -46,6 +46,23 @@ class User(UserMixin, db.Model):
     # 一个用户发表的所有评论
     comments: so.WriteOnlyMapped['Comment'] = so.relationship(
         back_populates='author', lazy='dynamic', cascade='all, delete-orphan',passive_deletes=True)
+    
+    # 【新增字段】记录用户最后一次查看私信的时间
+    # 这个字段可以为 NULL (用 Optional)，因为新用户还没有看过任何消息。
+    last_message_read_time: so.Mapped[Optional[datetime]]
+    # --- 【新增关系】 ---
+    # `messages_sent`: 获取该用户作为【发送者】的所有消息
+    messages_sent: so.WriteOnlyMapped['Message'] = so.relationship(
+        # 同样，必须用 foreign_keys 来明确这个关系
+        # 与 Message 模型中的 'author' 属性互为反向
+        foreign_keys='Message.sender_id', back_populates='author')
+    # `messages_received`: 获取该用户作为【接收者】的所有消息
+    messages_received: so.WriteOnlyMapped['Message'] = so.relationship(
+        # 与 Message 模型中的 'recipient' 属性互为反向
+        foreign_keys='Message.recipient_id', back_populates='recipient')
+    # 【新增关系】一个用户可以有多条通知
+    notifications: so.WriteOnlyMapped['Notification'] = so.relationship(
+        back_populates='user')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -110,6 +127,34 @@ class User(UserMixin, db.Model):
         except Exception:
             return
         return db.session.get(User, id)
+    
+    # 【新增方法】计算未读消息的数量
+    def unread_message_count(self):
+        # 获取用户上次读取消息的时间。如果是新用户 (值为 None)，
+        # 就使用一个非常早的时间 (1900年) 作为起点。
+        last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
+        # 构建查询：
+        # 查找所有【接收者是我】(Message.recipient == self) 并且
+        # 【消息时间戳晚于我上次读取时间】(Message.timestamp > last_read_time) 的消息。
+        query = sa.select(Message).where(Message.recipient == self,
+                                         Message.timestamp > last_read_time)
+        # 在上面的查询基础上，只计算数量 (COUNT)，而不是获取消息本身，这样更高效。
+        return db.session.scalar(sa.select(sa.func.count()).select_from(
+            query.subquery()))
+    
+    # 【新增方法】添加或更新一条通知
+    #  写入通知时调用
+    def add_notification(self, name, data):
+        # 先删除同名的旧通知，以实现“更新”的效果
+        db.session.execute(self.notifications.delete().where(
+            Notification.name == name))
+        # 创建一条新通知
+        # 将data中的纯数据转换为json形式
+        # data不一定是数字
+        # 例如将 1 转换为{"count": 1}
+        n = Notification(name=name, payload_json=json.dumps(data), user=self)
+        db.session.add(n)
+        return n
 
 
 @login.user_loader
@@ -296,3 +341,57 @@ class Comment(db.Model):
     def __repr__(self):
         return f'<Comment {self.body}>'
 
+
+class Message(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    # --- 核心外键 ---
+    # 发送者的用户 ID，外键指向 user 表的 id
+    sender_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id),
+                                                 index=True)
+    # 接收者的用户 ID，同样是外键指向 user 表的 id
+    recipient_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id),
+                                                    index=True)
+    # 私信的正文内容
+    body: so.Mapped[str] = so.mapped_column(sa.String(140))
+    # 私信的发送时间戳，默认值为当前的 UTC 时间
+    timestamp: so.Mapped[datetime] = so.mapped_column(
+        index=True, default=lambda: datetime.now(timezone.utc))
+    # --- 反向关系 (Back-Populates) ---
+    # `author` 关系：通过 sender_id 链接回 User 模型
+    author: so.Mapped[User] = so.relationship(
+        # 【关键】当一个模型有多个外键指向同一个模型时，
+        # 必须使用 foreign_keys 来明确指出这个关系应该使用哪个外键
+        foreign_keys='Message.sender_id',
+        # 这个关系与 User 模型中的 'messages_sent' 属性互为反向
+        back_populates='messages_sent')
+    # `recipient` 关系：通过 recipient_id 链接回 User 模型
+    recipient: so.Mapped[User] = so.relationship(
+        foreign_keys='Message.recipient_id',
+        back_populates='messages_received')
+
+    def __repr__(self):
+        return '<Message {}>'.format(self.body)
+
+
+class Notification(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    # 通知的名称，如 'unread_message_count'
+    name: so.Mapped[str] = so.mapped_column(sa.String(128), index=True)
+    # 通知属于哪个用户
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id),
+                                               index=True)
+    timestamp: so.Mapped[float] = so.mapped_column(index=True, default=time)
+    # 存储具体数据的 JSON 字符串
+    payload_json: so.Mapped[str] = so.mapped_column(sa.Text)
+
+    user: so.Mapped[User] = so.relationship(back_populates='notifications')
+
+    # 读取通知时调用
+    def get_data(self):
+        # 将 JSON 字符串解析回 Python 对象
+        return json.loads(str(self.payload_json))
+        # json.loads(json_string): 接收一个 JSON 格式的字符串
+        # 并把它反序列化 (deserialize) 成一个等价的 Python 对象。
+        # 字典、列表、数字、字符串等
+        # 当初存进去什么，就还原成什么
+        

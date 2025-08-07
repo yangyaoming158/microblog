@@ -6,12 +6,11 @@ from flask_babel import _, get_locale
 import sqlalchemy as sa
 from langdetect import detect, LangDetectException
 from app import db
-from app.main.forms import EditProfileForm, EmptyForm, PostForm
-from app.models import User, Post,Comment
+from app.main.forms import EditProfileForm, EmptyForm, PostForm,MessageForm
+from app.models import User, Post,Comment,Message,Notification
 from app.translate import translate
 from app.main import bp
 from app.main.forms import SearchForm,CommentForm
-
 
 # g 对象： 是 Flask 提供的一个“请求全局”的存储空间
 # 它就像一个“背包”，在一个完整的请求-响应周期内，你可以往里面放任何东西，并在该周期的任何地方（比如视图函数、模板）取出来用
@@ -284,3 +283,74 @@ def user_popup(username):
     user = db.first_or_404(sa.select(User).where(User.username == username))
     form = EmptyForm()
     return render_template('user_popup.html', user=user, form=form)
+
+
+@bp.route('/send_message/<recipient>', methods=['GET', 'POST'])
+@login_required
+def send_message(recipient):
+    # 指定user为接收者
+    user = db.first_or_404(sa.select(User).where(User.username == recipient))
+    form = MessageForm()
+    if form.validate_on_submit():
+        msg = Message(author=current_user, recipient=user,
+                      body=form.message.data)
+        db.session.add(msg)
+        # 【新增】为接收者更新未读消息计数的通知
+        user.add_notification('unread_message_count',
+                              user.unread_message_count())
+        db.session.commit()
+        flash(_('Your message has been sent.'))
+        return redirect(url_for('main.user', username=recipient))
+    return render_template('send_message.html', title=_('Send Message'),
+                           form=form, recipient=recipient)
+
+
+@bp.route('/messages')
+@login_required
+def messages():
+    # 【核心】更新“最后已读消息时间”
+    #    - 只要用户访问了这个页面，就意味着他已经看到了最新的消息。
+    #    - 我们立即将当前用户的 `last_message_read_time` 字段更新为当前的 UTC 时间。
+    #    - 这个时间戳将作为“分割线”，用于未来计算有多少“新”的未读消息。
+    current_user.last_message_read_time = datetime.now(timezone.utc)
+    # 【新增】一旦进入私信页面就将未读消息通知清零
+    current_user.add_notification('unread_message_count', 0)
+    db.session.commit()
+    page = request.args.get('page', 1, type=int)
+    # 构建数据库查询
+    #    - current_user.messages_received: 
+    #      因为它的类型是 WriteOnlyMapped，所以这个属性本身是一个
+    #      【特殊的关系集合对象 (WriteOnlyCollection)】，而不是一个列表。
+    #    - .select(): 【关键】这个特殊集合对象提供了一个 .select() 方法。
+    #      调用它，会构建一个【基础的 SQLAlchemy 查询对象】，
+    #      这个查询的作用就是“选取所有接收者是当前用户的消息”。
+    #    - .order_by(...):
+    #      我们在这个基础查询对象上，继续添加一个排序子句。
+    query = current_user.messages_received.select().order_by(
+        Message.timestamp.desc())
+    messages = db.paginate(query, page=page,
+                           per_page=current_app.config['POSTS_PER_PAGE'],
+                           error_out=False)
+    next_url = url_for('main.messages', page=messages.next_num) \
+        if messages.has_next else None
+    prev_url = url_for('main.messages', page=messages.prev_num) \
+        if messages.has_prev else None
+    return render_template('messages.html', messages=messages.items,
+                           next_url=next_url, prev_url=prev_url)
+
+
+@bp.route('/notifications')
+@login_required
+def notifications():
+    # 获取 'since' 参数，如果不存在则默认为 0.0
+    since = request.args.get('since', 0.0, type=float)
+    # 查询比 'since' 时间戳更新的所有通知
+    query = current_user.notifications.select().where(
+        Notification.timestamp > since).order_by(Notification.timestamp.asc())
+    notifications = db.session.scalars(query)
+    # 将结果格式化为 JSON 列表并返回
+    return [{
+        'name': n.name,
+        'data': n.get_data(),
+        'timestamp': n.timestamp
+    } for n in notifications]
