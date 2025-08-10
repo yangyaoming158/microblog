@@ -247,7 +247,7 @@ def post(post_id):
         comment = Comment(
             body=form.body.data,
             author=current_user,
-            post=post  # 直接将 post 对象关联起来
+            post=post, # 直接将 post 对象关联起来
         )
         db.session.add(comment)
         db.session.commit()
@@ -285,57 +285,33 @@ def user_popup(username):
     return render_template('user_popup.html', user=user, form=form)
 
 
-@bp.route('/send_message/<recipient>', methods=['GET', 'POST'])
-@login_required
-def send_message(recipient):
-    # 指定user为接收者
-    user = db.first_or_404(sa.select(User).where(User.username == recipient))
-    form = MessageForm()
-    if form.validate_on_submit():
-        msg = Message(author=current_user, recipient=user,
-                      body=form.message.data)
-        db.session.add(msg)
-        # 【新增】为接收者更新未读消息计数的通知
-        user.add_notification('unread_message_count',
-                              user.unread_message_count())
-        db.session.commit()
-        flash(_('Your message has been sent.'))
-        return redirect(url_for('main.user', username=recipient))
-    return render_template('send_message.html', title=_('Send Message'),
-                           form=form, recipient=recipient)
-
 
 @bp.route('/messages')
 @login_required
 def messages():
-    # 【核心】更新“最后已读消息时间”
-    #    - 只要用户访问了这个页面，就意味着他已经看到了最新的消息。
-    #    - 我们立即将当前用户的 `last_message_read_time` 字段更新为当前的 UTC 时间。
-    #    - 这个时间戳将作为“分割线”，用于未来计算有多少“新”的未读消息。
-    current_user.last_message_read_time = datetime.now(timezone.utc)
-    # 【新增】一旦进入私信页面就将未读消息通知清零
-    current_user.add_notification('unread_message_count', 0)
-    db.session.commit()
     page = request.args.get('page', 1, type=int)
-    # 构建数据库查询
-    #    - current_user.messages_received: 
-    #      因为它的类型是 WriteOnlyMapped，所以这个属性本身是一个
-    #      【特殊的关系集合对象 (WriteOnlyCollection)】，而不是一个列表。
-    #    - .select(): 【关键】这个特殊集合对象提供了一个 .select() 方法。
-    #      调用它，会构建一个【基础的 SQLAlchemy 查询对象】，
-    #      这个查询的作用就是“选取所有接收者是当前用户的消息”。
-    #    - .order_by(...):
-    #      我们在这个基础查询对象上，继续添加一个排序子句。
-    query = current_user.messages_received.select().order_by(
-        Message.timestamp.desc())
-    messages = db.paginate(query, page=page,
-                           per_page=current_app.config['POSTS_PER_PAGE'],
-                           error_out=False)
-    next_url = url_for('main.messages', page=messages.next_num) \
-        if messages.has_next else None
-    prev_url = url_for('main.messages', page=messages.prev_num) \
-        if messages.has_prev else None
-    return render_template('messages.html', messages=messages.items,
+    # 【核心重构】查询所有与我对话过的用户，并按最近消息时间排序
+    # 我们需要一个更复杂的查询来获取每个对话的最后一条消息
+    # 为了简化，我们先获取所有对话伙伴，后续可以优化
+    sent_to_q = db.select(Message.recipient_id).where(Message.sender_id == current_user.id)
+    received_from_q = db.select(Message.sender_id).where(Message.recipient_id == current_user.id)
+    # 获取所有与我相关的用户ID，并去重
+    user_ids = list(set(db.session.scalars(sent_to_q).all() + db.session.scalars(received_from_q).all()))
+    if not user_ids:
+        users = []
+        
+    else:
+        # 查询这些用户，未来可以按最后消息时间排序
+        users_query = sa.select(User).where(User.id.in_(user_ids))
+        # 使用 paginate 来分页显示这些“对话伙伴”
+        pagination = db.paginate(users_query, page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+        users = pagination.items
+        
+    next_url = url_for('main.messages', page=pagination.next_num) \
+        if pagination.has_next else None
+    prev_url = url_for('main.messages', page=pagination.prev_num) \
+        if pagination.has_prev else None
+    return render_template('messages.html', users=users,
                            next_url=next_url, prev_url=prev_url)
 
 
@@ -354,3 +330,52 @@ def notifications():
         'data': n.get_data(),
         'timestamp': n.timestamp
     } for n in notifications]
+
+
+@bp.route('/conversation/<username>', methods=['GET', 'POST'])
+@login_required
+def conversation(username):
+    # 找到对话的另一方
+    user = db.first_or_404(sa.select(User).where(User.username == username))
+    
+    # 创建用于发送新消息的表单
+    form = MessageForm() 
+    
+    if form.validate_on_submit():
+        
+        # 处理发送新消息的逻辑
+        msg = Message(author=current_user, recipient=user,
+                      body=form.message.data)
+        db.session.add(msg)
+        # 给对方发送通知
+        user.add_notification('unread_message_count', user.unread_message_count())
+        db.session.commit()
+        flash(_('Your message has been sent.'))
+        # 提交后重定向到同一页面，刷新聊天记录
+        return redirect(url_for('main.conversation', username=username))
+    
+    # 访问此页面时，将与该用户的所有消息标记为已读
+    current_user.last_message_read_time = datetime.now(timezone.utc)
+    # 并且将未读消息通知清零
+    current_user.add_notification('unread_message_count', 0)
+    db.session.commit()
+    
+    # 【核心】查询你和这个 user 之间的所有消息
+    page = request.args.get('page', 1, type=int)
+    messages_query = sa.select(Message).where(
+        sa.or_(
+            sa.and_(Message.recipient_id == current_user.id, Message.sender_id == user.id),
+            sa.and_(Message.recipient_id == user.id, Message.sender_id == current_user.id)
+        )
+    ).order_by(Message.timestamp.desc()) # 按时间【降序】，最新的消息在最上面
+    
+    messages = db.paginate(messages_query, page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+
+    next_url = url_for('main.messages', page=messages.next_num) \
+        if messages.has_next else None
+    prev_url = url_for('main.messages', page=messages.prev_num) \
+        if messages.has_prev else None
+    
+    return render_template('conversation.html', title=f"Conversation with {username}",
+                           form=form, recipient=user, messages=messages.items,
+                           next_url=next_url, prev_url=prev_url)

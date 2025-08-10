@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-08-07 16:02+0800\n"
+"POT-Creation-Date: 2025-08-10 17:37+0800\n"
 "PO-Revision-Date: 2024-05-20 10:00+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -22,13 +22,13 @@ msgstr ""
 msgid "Please log in to access this page."
 msgstr "请登录以访问此页面。"
 
-#: app/translate.py:30
+#: app/translate.py:39
 msgid "Error: the translation service is not configured."
-msgstr ""
+msgstr "错误：翻译服务没有配置"
 
-#: app/translate.py:64 app/translate.py:74
+#: app/translate.py:73 app/translate.py:83
 msgid "Error: the translation service failed."
-msgstr ""
+msgstr "错误：翻译服务失败"
 
 #: app/auth/email.py:8
 msgid "[Microblog] Reset Your Password"
@@ -173,29 +173,25 @@ msgstr "您的密码已被重置。"
 msgid "Your comment has been published."
 msgstr "您的密码已被重置。"
 
-#: app/main/routes.py:298
+#: app/main/routes.py:353
 #, fuzzy
 msgid "Your message has been sent."
 msgstr "您的密码已被重置。"
-
-#: app/main/routes.py:300
-msgid "Send Message"
-msgstr "发送私信"
 
 #: app/templates/_post.html:21
 #, python-format
 msgid "%(username)s said %(when)s"
 msgstr "%(username)s 发表于 %(when)s"
 
-#: app/templates/_post.html:28
+#: app/templates/_post.html:29
 msgid "comment zone"
 msgstr "回帖"
 
-#: app/templates/_post.html:51
+#: app/templates/_post.html:53
 msgid "Translate"
 msgstr "翻译"
 
-#: app/templates/_post.html:75
+#: app/templates/_post.html:77
 msgid "Delete"
 msgstr "删除"
 
@@ -219,51 +215,55 @@ msgstr "登出"
 msgid "Messages"
 msgstr "私信"
 
+#: app/templates/conversation.html:4
+#, fuzzy, python-format
+msgid "Messages with %(username)s"
+msgstr "你好, %(username)s！"
+
+#: app/templates/conversation.html:27 app/templates/messages.html:43
+#, fuzzy
+msgid "Newer messages"
+msgstr "较新的文章"
+
+#: app/templates/conversation.html:32 app/templates/messages.html:48
+#, fuzzy
+msgid "Older messages"
+msgstr "较早的文章"
+
 #: app/templates/index.html:5
 #, python-format
 msgid "Hi, %(username)s!"
 msgstr "你好, %(username)s！"
 
 #: app/templates/index.html:16 app/templates/search.html:12
-#: app/templates/user.html:89
+#: app/templates/user.html:88
 msgid "Newer posts"
 msgstr "较新的文章"
 
 #: app/templates/index.html:21 app/templates/search.html:17
-#: app/templates/user.html:95
+#: app/templates/user.html:94
 msgid "Older posts"
 msgstr "较早的文章"
 
-#: app/templates/messages.html:12
-#, fuzzy
-msgid "Newer messages"
-msgstr "较新的文章"
-
-#: app/templates/messages.html:17
-#, fuzzy
-msgid "Older messages"
-msgstr "较早的文章"
+#: app/templates/messages.html:32
+msgid "Chat"
+msgstr "聊天"
 
 #: app/templates/post_detail.html:25
 msgid "Comments"
 msgstr "评论"
 
-#: app/templates/post_detail.html:51
+#: app/templates/post_detail.html:52
 msgid "Previous Comments"
 msgstr "上一页评论"
 
-#: app/templates/post_detail.html:54
+#: app/templates/post_detail.html:55
 msgid "Next Comments"
 msgstr "下一页评论"
 
 #: app/templates/search.html:4
 msgid "Search Results"
 msgstr "搜索结果"
-
-#: app/templates/send_message.html:5
-#, python-format
-msgid "Send Message to %(recipient)s"
-msgstr "发送私信给%(recipient)s"
 
 #: app/templates/user.html:15
 msgid "User"
@@ -295,7 +295,7 @@ msgstr "关注"
 msgid "Unfollow"
 msgstr "取消关注"
 
-#: app/templates/user.html:59
+#: app/templates/user.html:58
 msgid "Send private message"
 msgstr "发送私信"
 
@@ -340,4 +340,10 @@ msgstr "管理员已收到通知。对您造成的不便，我们深表歉意！
 
 #~ msgid "Next results"
 #~ msgstr "下一页结果"
+
+#~ msgid "Send Message"
+#~ msgstr "发送私信"
+
+#~ msgid "Send Message to %(recipient)s"
+#~ msgstr "发送私信给%(recipient)s"
 

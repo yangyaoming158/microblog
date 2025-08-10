@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h3>{{ _('Messages with %(username)s', username=recipient.username) }}</h3>
+
+    <!-- 遍历显示聊天记录 -->
+    {% for post in messages %}
+        {% set show_comment_link = False %}
+        {% include '_post.html'%}
+    {% endfor %}
+
+    <hr>
+
+    <!-- 在页面底部显示发送新消息的表单 -->
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.message.label }}
+        {{ form.message(rows=3, class_='form-control') }}
+        {{ form.submit(class_='btn btn-primary mt-2') }}
+    </form>
+
+    <!-- 分页导航 -->
+    <nav aria-label="Post navigation">
+        <ul class="pagination">
+            <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                <a class="page-link" href="#">
+                    <span aria-hidden="true">&larr;</span> {{ _('Newer messages') }}
+                </a>
+            </li>
+            <li class="page-item{% if not next_url %} disabled{% endif %}">
+                <a class="page-link" href="#">
+                    {{ _('Older messages') }} <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

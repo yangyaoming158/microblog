@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-08-07 16:02+0800\n"
+"POT-Creation-Date: 2025-08-10 17:37+0800\n"
 "PO-Revision-Date: 2017-09-29 23:25-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -22,11 +22,11 @@ msgstr ""
 msgid "Please log in to access this page."
 msgstr "Por favor ingrese para acceder a esta página."
 
-#: app/translate.py:30
+#: app/translate.py:39
 msgid "Error: the translation service is not configured."
 msgstr ""
 
-#: app/translate.py:64 app/translate.py:74
+#: app/translate.py:73 app/translate.py:83
 msgid "Error: the translation service failed."
 msgstr ""
 
@@ -173,29 +173,25 @@ msgstr "Tu contraseña ha sido cambiada."
 msgid "Your comment has been published."
 msgstr "Tu contraseña ha sido cambiada."
 
-#: app/main/routes.py:298
+#: app/main/routes.py:353
 #, fuzzy
 msgid "Your message has been sent."
 msgstr "Tu contraseña ha sido cambiada."
-
-#: app/main/routes.py:300
-msgid "Send Message"
-msgstr ""
 
 #: app/templates/_post.html:21
 #, python-format
 msgid "%(username)s said %(when)s"
 msgstr "%(username)s dijo %(when)s"
 
-#: app/templates/_post.html:28
+#: app/templates/_post.html:29
 msgid "comment zone"
 msgstr ""
 
-#: app/templates/_post.html:51
+#: app/templates/_post.html:53
 msgid "Translate"
 msgstr ""
 
-#: app/templates/_post.html:75
+#: app/templates/_post.html:77
 msgid "Delete"
 msgstr ""
 
@@ -219,51 +215,55 @@ msgstr "Salir"
 msgid "Messages"
 msgstr ""
 
+#: app/templates/conversation.html:4
+#, fuzzy, python-format
+msgid "Messages with %(username)s"
+msgstr "¡Hola, %(username)s!"
+
+#: app/templates/conversation.html:27 app/templates/messages.html:43
+#, fuzzy
+msgid "Newer messages"
+msgstr "Artículos siguientes"
+
+#: app/templates/conversation.html:32 app/templates/messages.html:48
+#, fuzzy
+msgid "Older messages"
+msgstr "Artículos previos"
+
 #: app/templates/index.html:5
 #, python-format
 msgid "Hi, %(username)s!"
 msgstr "¡Hola, %(username)s!"
 
 #: app/templates/index.html:16 app/templates/search.html:12
-#: app/templates/user.html:89
+#: app/templates/user.html:88
 msgid "Newer posts"
 msgstr "Artículos siguientes"
 
 #: app/templates/index.html:21 app/templates/search.html:17
-#: app/templates/user.html:95
+#: app/templates/user.html:94
 msgid "Older posts"
 msgstr "Artículos previos"
 
-#: app/templates/messages.html:12
-#, fuzzy
-msgid "Newer messages"
-msgstr "Artículos siguientes"
-
-#: app/templates/messages.html:17
-#, fuzzy
-msgid "Older messages"
-msgstr "Artículos previos"
+#: app/templates/messages.html:32
+msgid "Chat"
+msgstr ""
 
 #: app/templates/post_detail.html:25
 msgid "Comments"
 msgstr ""
 
-#: app/templates/post_detail.html:51
+#: app/templates/post_detail.html:52
 msgid "Previous Comments"
 msgstr ""
 
-#: app/templates/post_detail.html:54
+#: app/templates/post_detail.html:55
 msgid "Next Comments"
 msgstr ""
 
 #: app/templates/search.html:4
 msgid "Search Results"
 msgstr "Resultados de Búsqueda"
-
-#: app/templates/send_message.html:5
-#, python-format
-msgid "Send Message to %(recipient)s"
-msgstr ""
 
 #: app/templates/user.html:15
 msgid "User"
@@ -295,7 +295,7 @@ msgstr "Seguir"
 msgid "Unfollow"
 msgstr "Dejar de seguir"
 
-#: app/templates/user.html:59
+#: app/templates/user.html:58
 msgid "Send private message"
 msgstr ""
 
@@ -340,4 +340,10 @@ msgstr "El administrador ha sido notificado. ¡Lamentamos la inconveniencia!"
 
 #~ msgid "Next results"
 #~ msgstr "Resultados próximos"
+
+#~ msgid "Send Message"
+#~ msgstr ""
+
+#~ msgid "Send Message to %(recipient)s"
+#~ msgstr ""
 

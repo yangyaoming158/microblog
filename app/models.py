@@ -64,6 +64,7 @@ class User(UserMixin, db.Model):
     notifications: so.WriteOnlyMapped['Notification'] = so.relationship(
         back_populates='user')
 
+    
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
@@ -156,6 +157,7 @@ class User(UserMixin, db.Model):
         db.session.add(n)
         return n
 
+    
 
 @login.user_loader
 def load_user(id):
@@ -326,7 +328,6 @@ class Comment(db.Model):
     body: so.Mapped[str] = so.mapped_column(sa.String(140))
     timestamp: so.Mapped[datetime] = so.mapped_column(
         index=True, default=lambda: datetime.now(timezone.utc))
-    
     # --- 关系 ---
     # 评论的作者
     author_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('user.id', ondelete='CASCADE'), 
@@ -356,6 +357,7 @@ class Message(db.Model):
     # 私信的发送时间戳，默认值为当前的 UTC 时间
     timestamp: so.Mapped[datetime] = so.mapped_column(
         index=True, default=lambda: datetime.now(timezone.utc))
+
     # --- 反向关系 (Back-Populates) ---
     # `author` 关系：通过 sender_id 链接回 User 模型
     author: so.Mapped[User] = so.relationship(

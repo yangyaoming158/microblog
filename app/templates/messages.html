@@ -2,10 +2,40 @@
 
 {% block content %}
     <h1>{{ _('Messages') }}</h1>
-    {% for post in messages %}
-        {% set show_comment_link = False %}
-        {% include '_post.html'%}
-    {% endfor %}
+    
+    <!-- 
+      使用 Bootstrap 的 list-group 来创建一个更美观的列表。
+      list-group-flush 可以移除边框，让它更简洁。
+    -->
+    <div class="list-group list-group-flush">
+        <!-- 遍历从后端传来的 'users' (对话伙伴) 列表 -->
+        {% for user in users %}
+            <!-- 
+              【核心布局修改】
+              - d-flex: 启用 Flexbox 布局。
+              - justify-content-between: 核心！让内部元素两端对齐。
+              - align-items-center: 让内部元素垂直居中。
+            -->
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                
+                <!-- 1. 左侧部分：头像和用户名，链接到【个人资料页】 -->
+                <div>
+                    <a class="user_popup" href="{{ url_for('main.user', username=user.username) }}">
+                        <img src="{{ user.avatar(48) }}" class="rounded-circle" style="vertical-align: middle; margin-right: 10px;">
+                        <strong style="font-size: 1.2em;">{{ user.username }}</strong>
+                    </a>
+                </div>
+
+                <!-- 2. 右侧部分：新的“Chat”按钮，链接到【对话页】 -->
+                <div>
+                    <a href="{{ url_for('main.conversation', username=user.username) }}" class="btn btn-primary btn-sm">
+                        {{ _('Chat') }}
+                    </a>
+                </div>
+
+            </div>
+        {% endfor %}
+    </div>
     <nav aria-label="Post navigation">
         <ul class="pagination">
             <li class="page-item{% if not prev_url %} disabled{% endif %}">

@@ -22,6 +22,15 @@ def translate(text, source_language, dest_language):
     使用百度翻译 API 翻译文本。
     这个函数的结构模仿了教程中微软翻译的版本。
     """
+     # --- 【新增的调试代码】 ---
+    print("--- TRANSLATION ATTEMPT ---")
+    print(f"Text: {text}")
+    print(f"Source Language: {source_language}")
+    print(f"Destination Language: {dest_language}")
+    print(f"BAIDU APP ID IS SET: {'BAIDU_TRANSLATOR_APP_ID' in current_app.config and current_app.config['BAIDU_TRANSLATOR_APP_ID'] is not None}")
+    print(f"BAIDU KEY IS SET: {'BAIDU_TRANSLATOR_KEY' in current_app.config and current_app.config['BAIDU_TRANSLATOR_KEY'] is not None}")
+    print("---------------------------")
+    # --- 调试代码结束 ---
 
     # 1. 检查配置是否存在
     #    教程检查 'MS_TRANSLATOR_KEY'，我们检查百度的凭据。
