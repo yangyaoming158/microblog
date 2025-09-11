@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-08-10 17:37+0800\n"
+"POT-Creation-Date: 2025-09-11 18:03+0800\n"
 "PO-Revision-Date: 2024-05-20 10:00+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -34,7 +34,7 @@ msgstr "错误：翻译服务失败"
 msgid "[Microblog] Reset Your Password"
 msgstr "[Microblog] 重置您的密码"
 
-#: app/auth/forms.py:11 app/auth/forms.py:18 app/main/forms.py:12
+#: app/auth/forms.py:11 app/auth/forms.py:18 app/main/forms.py:13
 msgid "Username"
 msgstr "用户名"
 
@@ -63,7 +63,7 @@ msgstr "重复密码"
 msgid "Register"
 msgstr "注册"
 
-#: app/auth/forms.py:30 app/main/forms.py:26
+#: app/auth/forms.py:30 app/main/forms.py:27
 msgid "Please use a different username."
 msgstr "请输入一个不同的用户名。"
 
@@ -95,88 +95,97 @@ msgstr "重置密码"
 msgid "Your password has been reset."
 msgstr "您的密码已被重置。"
 
-#: app/main/forms.py:13
+#: app/main/forms.py:14
 msgid "About me"
 msgstr "关于我"
 
-#: app/main/forms.py:15 app/main/forms.py:36 app/main/forms.py:81
-#: app/main/forms.py:86
+#: app/main/forms.py:16 app/main/forms.py:45 app/main/forms.py:90
+#: app/main/forms.py:95
 msgid "Submit"
 msgstr "提交"
 
-#: app/main/forms.py:34
+#: app/main/forms.py:32
+msgid "New Avatar"
+msgstr "新头像"
+
+#: app/main/forms.py:35
+msgid "Upload"
+msgstr "上传"
+
+#: app/main/forms.py:43
 msgid "Say something"
 msgstr "说点什么"
 
-#: app/main/forms.py:48 app/main/routes.py:203 app/templates/base.html:74
+#: app/main/forms.py:57 app/main/routes.py:209 app/templates/base.html:74
 msgid "Search"
 msgstr "搜索"
 
-#: app/main/forms.py:80
+#: app/main/forms.py:89
 msgid "Comment"
 msgstr "评论"
 
-#: app/main/forms.py:84
+#: app/main/forms.py:93
 msgid "Message"
 msgstr "私信"
 
-#: app/main/routes.py:46
+#: app/main/routes.py:49
 msgid "Your post is now live!"
 msgstr "您的文章已成功发布！"
 
-#: app/main/routes.py:56 app/templates/base.html:51
+#: app/main/routes.py:59 app/templates/base.html:51
 msgid "Home"
 msgstr "首页"
 
-#: app/main/routes.py:73 app/templates/base.html:54
+#: app/main/routes.py:76 app/templates/base.html:54
 msgid "Explore"
 msgstr "发现"
 
-#: app/main/routes.py:105
+#: app/main/routes.py:111
 msgid "Your changes have been saved."
 msgstr "您的更改已保存。"
 
-#: app/main/routes.py:110 app/templates/edit_profile.html:5
+#: app/main/routes.py:116 app/templates/edit_profile.html:5
 msgid "Edit Profile"
 msgstr "编辑个人资料"
 
-#: app/main/routes.py:122 app/main/routes.py:143
+#: app/main/routes.py:128 app/main/routes.py:149
 #, python-format
 msgid "User %(username)s not found."
 msgstr "用户 %(username)s 未找到。"
 
-#: app/main/routes.py:125
+#: app/main/routes.py:131
 msgid "You cannot follow yourself!"
 msgstr "您不能关注自己！"
 
-#: app/main/routes.py:129
+#: app/main/routes.py:135
 #, python-format
 msgid "You are following %(username)s!"
 msgstr "您正在关注 %(username)s！"
 
-#: app/main/routes.py:146
+#: app/main/routes.py:152
 msgid "You cannot unfollow yourself!"
 msgstr "您不能取消关注自己！"
 
-#: app/main/routes.py:150
+#: app/main/routes.py:156
 #, python-format
 msgid "You are not following %(username)s."
 msgstr "您没有关注 %(username)s。"
 
-#: app/main/routes.py:228
-#, fuzzy
+#: app/main/routes.py:234
 msgid "Your post has been deleted!"
-msgstr "您的密码已被重置。"
+msgstr "您的文章已被删除！"
 
-#: app/main/routes.py:254
-#, fuzzy
+#: app/main/routes.py:260
 msgid "Your comment has been published."
-msgstr "您的密码已被重置。"
+msgstr "您的评论已发布。"
 
-#: app/main/routes.py:353
-#, fuzzy
+#: app/main/routes.py:359
 msgid "Your message has been sent."
-msgstr "您的密码已被重置。"
+msgstr "您的私信已发送。"
+
+#: app/main/routes.py:416
+msgid "Your avatar has been updated!"
+msgstr "您的头像已更新！"
 
 #: app/templates/_post.html:21
 #, python-format
@@ -216,19 +225,17 @@ msgid "Messages"
 msgstr "私信"
 
 #: app/templates/conversation.html:4
-#, fuzzy, python-format
+#, python-format
 msgid "Messages with %(username)s"
-msgstr "你好, %(username)s！"
+msgstr "与 %(username)s 的对话"
 
 #: app/templates/conversation.html:27 app/templates/messages.html:43
-#, fuzzy
 msgid "Newer messages"
-msgstr "较新的文章"
+msgstr "较新的私信"
 
 #: app/templates/conversation.html:32 app/templates/messages.html:48
-#, fuzzy
 msgid "Older messages"
-msgstr "较早的文章"
+msgstr "较早的私信"
 
 #: app/templates/index.html:5
 #, python-format
@@ -236,12 +243,12 @@ msgid "Hi, %(username)s!"
 msgstr "你好, %(username)s！"
 
 #: app/templates/index.html:16 app/templates/search.html:12
-#: app/templates/user.html:88
+#: app/templates/user.html:114
 msgid "Newer posts"
 msgstr "较新的文章"
 
 #: app/templates/index.html:21 app/templates/search.html:17
-#: app/templates/user.html:94
+#: app/templates/user.html:120
 msgid "Older posts"
 msgstr "较早的文章"
 
@@ -265,37 +272,41 @@ msgstr "下一页评论"
 msgid "Search Results"
 msgstr "搜索结果"
 
-#: app/templates/user.html:15
+#: app/templates/user.html:33
+msgid "Change Avatar"
+msgstr "更换头像"
+
+#: app/templates/user.html:41
 msgid "User"
 msgstr "用户"
 
-#: app/templates/user.html:21 app/templates/user_popup.html:7
+#: app/templates/user.html:47 app/templates/user_popup.html:7
 msgid "Last seen on"
 msgstr "上次在线于"
 
-#: app/templates/user.html:24 app/templates/user_popup.html:9
+#: app/templates/user.html:50 app/templates/user_popup.html:9
 #, python-format
 msgid "%(count)d followers"
 msgstr "%(count)d 粉丝"
 
-#: app/templates/user.html:24 app/templates/user_popup.html:9
+#: app/templates/user.html:50 app/templates/user_popup.html:9
 #, python-format
 msgid "%(count)d following"
 msgstr "正在关注 %(count)d"
 
-#: app/templates/user.html:33
+#: app/templates/user.html:59
 msgid "Edit your profile"
 msgstr "编辑你的个人资料"
 
-#: app/templates/user.html:41 app/templates/user_popup.html:15
+#: app/templates/user.html:67 app/templates/user_popup.html:15
 msgid "Follow"
 msgstr "关注"
 
-#: app/templates/user.html:50 app/templates/user_popup.html:22
+#: app/templates/user.html:76 app/templates/user_popup.html:22
 msgid "Unfollow"
 msgstr "取消关注"
 
-#: app/templates/user.html:58
+#: app/templates/user.html:84
 msgid "Send private message"
 msgstr "发送私信"
 
@@ -345,5 +356,4 @@ msgstr "管理员已收到通知。对您造成的不便，我们深表歉意！
 #~ msgstr "发送私信"
 
 #~ msgid "Send Message to %(recipient)s"
-#~ msgstr "发送私信给%(recipient)s"
-
+#~ msgstr "发送私信给 %(recipient)s"

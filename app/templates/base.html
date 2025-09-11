@@ -352,6 +352,19 @@
       // 页面加载后，开始轮询
       document.addEventListener('DOMContentLoaded', initialize_notifications);
       {% endif %}
+
+
+      // 【新增】监听我们隐藏的文件输入框的变化
+      const avatarUpload = document.getElementById('avatar-upload');
+      if (avatarUpload) {
+          avatarUpload.addEventListener('change', function() {
+              // 当用户选择了文件后，这个 'change' 事件就会被触发
+              if (this.files.length > 0) {
+                  // 找到并【自动提交】包裹着它的表单
+                  document.getElementById('avatar-form').submit();
+              }
+          });
+      }
     </script>
     
   </body>

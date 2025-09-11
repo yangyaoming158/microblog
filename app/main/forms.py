@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, SubmitField, TextAreaField
 from wtforms.validators import ValidationError, DataRequired, Length
 import sqlalchemy as sa
@@ -24,6 +25,14 @@ class EditProfileForm(FlaskForm):
                 User.username == username.data))
             if user is not None:
                 raise ValidationError(_('Please use a different username.'))
+
+
+class ChangeAvatarForm(FlaskForm):
+    """一个专门用于上传新头像的表单"""
+    avatar = FileField(_l('New Avatar'), validators=[
+        FileAllowed(['jpg', 'png'], 'Images only!')
+    ])
+    submit = SubmitField(_l('Upload'))
 
 
 class EmptyForm(FlaskForm):

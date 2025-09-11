@@ -6,11 +6,14 @@ from flask_babel import _, get_locale
 import sqlalchemy as sa
 from langdetect import detect, LangDetectException
 from app import db
-from app.main.forms import EditProfileForm, EmptyForm, PostForm,MessageForm
+from app.main.forms import EditProfileForm, EmptyForm, PostForm,MessageForm,ChangeAvatarForm
 from app.models import User, Post,Comment,Message,Notification
 from app.translate import translate
 from app.main import bp
 from app.main.forms import SearchForm,CommentForm
+import os
+from werkzeug.utils import secure_filename
+from PIL import Image
 
 # g 对象： 是 Flask 提供的一个“请求全局”的存储空间
 # 它就像一个“背包”，在一个完整的请求-响应周期内，你可以往里面放任何东西，并在该周期的任何地方（比如视图函数、模板）取出来用
@@ -90,8 +93,11 @@ def user(username):
                        page=posts.prev_num) if posts.has_prev else None
     form = EmptyForm()
     empty_form = EmptyForm() # 使用空模板来实现删除帖子按钮
+    # avatar_form 用于“更换头像”
+    # 我们只在用户查看自己主页时才需要它，但为了简化，每次都创建也无妨
+    avatar_form = ChangeAvatarForm()
     return render_template('user.html', user=user, posts=posts.items,
-                           next_url=next_url, prev_url=prev_url, form=form,empty_form=empty_form)
+                           next_url=next_url, prev_url=prev_url, form=form,empty_form=empty_form,avatar_form=avatar_form)
 
 
 @bp.route('/edit_profile', methods=['GET', 'POST'])
@@ -379,3 +385,37 @@ def conversation(username):
     return render_template('conversation.html', title=f"Conversation with {username}",
                            form=form, recipient=user, messages=messages.items,
                            next_url=next_url, prev_url=prev_url)
+
+
+# 换头像
+@bp.route('/change_avatar', methods=['GET', 'POST'])
+@login_required
+def change_avatar():
+    form = ChangeAvatarForm()
+    if form.validate_on_submit():
+        if form.avatar.data:
+            # 这里的逻辑和之前 edit_profile 里的完全一样
+            random_hex = os.urandom(8).hex()
+            f_name, f_ext = os.path.splitext(form.avatar.data.filename)
+            avatar_fn = random_hex + f_ext
+            avatar_path = os.path.join(current_app.root_path, 'static/avatars', avatar_fn)
+            
+            # (可选) 删除旧头像文件以节省空间
+            if current_user.avatar_filename:
+                old_avatar_path = os.path.join(current_app.root_path, 'static/avatars', current_user.avatar_filename)
+                if os.path.exists(old_avatar_path):
+                    os.remove(old_avatar_path)
+            
+            output_size = (128, 128)
+            i = Image.open(form.avatar.data)
+            i.thumbnail(output_size)
+            i.save(avatar_path)
+            
+            current_user.avatar_filename = avatar_fn
+            db.session.commit()
+            flash(_('Your avatar has been updated!'))
+            # 上传成功后，重定向回用户主页
+            return redirect(url_for('main.user', username=current_user.username))
+    
+    # 如果是 GET 请求，也重定向回用户主页，因为我们不在一个单独的页面上显示这个表单
+    return redirect(url_for('main.user', username=current_user.username))
