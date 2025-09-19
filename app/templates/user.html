@@ -22,6 +22,9 @@
                     <!--    - 我们用 CSS style="display: none;" 把它藏起来。
                         - 我们给它一个 ID，比如 'avatar-upload'，以便 JS 能找到它。
                     -->
+                    <!--这段 Jinja2 代码，在经过服务器端渲染之后，输出到最终 HTML 页面里的内容，就是：
+                        <input id="avatar-upload" name="avatar" type="file" style="display: none;">
+                    -->
                     {{ avatar_form.avatar(id='avatar-upload', style='display: none;') }}
 
                     <!-- 2. 【可见】的、漂亮的“更换头像”按钮 -->
