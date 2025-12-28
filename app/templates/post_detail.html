@@ -32,7 +32,18 @@
     {% for comment in comments %}
     <div style="margin-top: 15px;">
         <a href="{{ url_for('main.user', username=comment.author.username) }}">
-        <img src="{{ comment.author.avatar(36) }}" style="vertical-align: middle;">
+        <img src="{{ comment.author.avatar(36) }}" 
+            style="
+                width: 36px; 
+                height: 36px; 
+                object-fit: cover; 
+                object-position: center; 
+                border-radius: 50%;         /* 【关键】变成圆形 */
+                vertical-align: middle; 
+                margin-right: 8px;          /* 添加右边距，让头像和名字有点间隔 */
+                border: 1px solid #dee2e6;  /* 可选：加一个淡淡的灰色边框，增加精致感 */
+            "
+            alt="{{ comment.author.username }}"> <!-- 添加 alt 属性是好习惯 -->
         </a>
         <strong>
             <a class="user_popup" href="{{ url_for('main.user', username=comment.author.username) }}">

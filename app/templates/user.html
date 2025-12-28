@@ -8,7 +8,9 @@
         <!-- 表格行，valign="top" 确保单元格内容垂直顶部对齐 -->
         <tr valign="top">
             <!-- 左侧单元格，用于显示用户头像，固定宽度 -->
-            <td width="256px"><img src="{{ user.avatar(256) }}" class="img-thumbnail">
+            <td width="256px"><img src="{{ user.avatar(256) }}" 
+                                style="width: 256px; height: 256px; object-fit: cover; object-position: center;" 
+                                class="img-thumbnail"> <!-- 保留 Bootstrap 的边框样式 -->
                 <!-- 【核心修改】只在用户查看【自己】的主页时，才显示更换头像的功能 -->
             {% if user == current_user %}
                 <!-- 

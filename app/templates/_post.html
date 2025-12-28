@@ -2,7 +2,8 @@
         <tr>
             <td width="70px">
                 <a href="{{ url_for('main.user', username=post.author.username) }}"> <!-- 使得点击头像也可以进入用户的主页 -->
-                    <img src="{{ post.author.avatar(70) }}" />
+                    <img src="{{ post.author.avatar(70) }}" 
+                        style="width: 70px; height: 70px; object-fit: cover; object-position: center;">
                 </a>
             </td>
             <td>
