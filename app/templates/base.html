@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
     <!-- 1. 基本的元标签 (Meta Tags) -->
     <meta charset="utf-8"> <!-- 定义字符编码为 UTF-8，确保中文等非英文字符正确显示 -->
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 响应式设计的关键！
@@ -363,6 +364,7 @@
           });
       }
     </script>
-    
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script><!-- 4. 引入 SimpleMDE markdown文本编辑器 -->
+    {% block scripts %}{% endblock %}
   </body>
 </html>

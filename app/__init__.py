@@ -4,7 +4,8 @@
 # 可配置性 (Configurability): create_app 函数可以接收一个配置类作为参数，这使得为不同环境（开发、测试、生产）创建使用不同配置的应用实例变得极其简单。
 # 模块化 (Modularity): 应用的所有功能都被组织在不同的蓝图 (Blueprints) 中，然后在工厂函数内部进行统一的“组装”。这使得代码结构清晰，功能边界明确。
 # 集中初始化: 所有与应用相关的初始化工作（绑定扩展、注册蓝图、配置日志）都集中在 create_app 这个函数里，一目了然。
-
+import markdown
+import bleach
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
@@ -17,6 +18,7 @@ from flask_moment import Moment
 from flask_babel import Babel, lazy_gettext as _l
 from config import Config
 from elasticsearch import Elasticsearch
+
 
 # --- 第一步：在全局范围创建【未绑定】的扩展实例 ---
 # 在这里创建扩展对象，但不传入 app 实例。
@@ -55,6 +57,8 @@ def create_app(config_class=Config):
     # 在 create_app 函数内部创建 Elasticsearch 的实例后，直接把它当作一个新的属性，“挂”在 app 对象上
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
         if app.config['ELASTICSEARCH_URL'] else None
+    
+    app.jinja_env.filters['markdown'] = format_markdown
 
     # c. 在函数内部，导入并注册蓝图 (Blueprints)
     #    将应用的不同功能模块化
@@ -121,6 +125,29 @@ def get_locale():
     # 找到最佳的匹配项。
     # 使用 current_app 是因为这个函数在请求上下文中被调用。
     return request.accept_languages.best_match(current_app.config['LANGUAGES'])
+
+def format_markdown(text):
+    # 1. 将 Markdown 转为 HTML
+    #    fenced_code: 支持 ``` 代码块
+    #    tables: 支持表格
+    allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                    'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                    'h1', 'h2', 'h3', 'p', 'img', 'br', 'span', 'div']
+    
+    # 允许的属性 (比如 img 的 src, a 的 href)
+    allowed_attrs = {
+        '*': ['class'],
+        'a': ['href', 'rel'],
+        'img': ['src', 'alt', 'title'],
+    }
+
+    html = markdown.markdown(text, extensions=['fenced_code', 'tables'])
+    
+    # 2. 【关键】使用 Bleach 清洗 HTML，防止 XSS 攻击
+    #    这一点至关重要！否则用户可以输入 <script>alert(1)</script> 来攻击你的网站。
+    clean_html = bleach.clean(html, tags=allowed_tags, attributes=allowed_attrs)
+    
+    return clean_html
 
 # --- 第四步：在文件底部导入 models 模块 ---
 # 这一步的目的是为了让 SQLAlchemy 能够发现我们的模型类。

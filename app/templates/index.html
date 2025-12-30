@@ -28,7 +28,7 @@
                 <!-- 2. 内容输入框 -->
                 <div class="mb-3">
                     {{ form.post.label(class="form-label") }}
-                    {{ form.post(rows=3, class="form-control", placeholder=_("What's on your mind?")) }}
+                    {{ form.post(rows=3, class="form-control", placeholder=_("What's on your mind?"),id="post-editor") }}<!-- 给输入框一个 ID -->
                     {% for error in form.post.errors %}
                     <span style="color: red;">[{{ error }}]</span>
                     {% endfor %}
@@ -65,4 +65,19 @@
         </ul>
         </nav>
     </nav>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        var simplemde = new SimpleMDE({ 
+            element: document.getElementById("post-editor"),
+            spellChecker: false, // 关掉拼写检查，对中文友好
+            autosave: {
+                enabled: true,
+                uniqueId: "MyPostAutosave", // 自动保存草稿
+            },
+            forceSync: true, // 【新增】 强制在每次更改时同步到 textarea
+        });
+    </script>
 {% endblock %}

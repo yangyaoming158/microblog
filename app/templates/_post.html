@@ -38,14 +38,14 @@
                     </a>
                 </h5>
 
-                <!-- 
-                1. 硬截断：后端只输出前 500 个字符。
-                    这保证了即使文章有一万字，传给浏览器的也只有 500 字，页面轻快。
-                2. class="post-excerpt": 应用我们之前写的淡化 CSS。
-                -->
                 <div class="post-excerpt mb-2 text-secondary">
                     <span id="post{{ post.id }}">
-                        {{ post.body | truncate(length=100, killwords=False, end='...') }}
+                        <!-- 
+                        1. truncate(100): 先截取 Markdown 源码的前 100 个字。
+                        2. markdown: 把这 100 个字的 Markdown 转成 HTML。
+                        3. safe: 告诉 Jinja2 这是安全的 HTML。
+                        -->
+                        {{ post.body | truncate(length=100, killwords=False, end='...') | markdown | safe }}
                     </span>
                 </div>
 

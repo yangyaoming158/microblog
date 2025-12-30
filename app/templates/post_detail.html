@@ -26,18 +26,29 @@
 
             <!-- 3. 文章正文 -->
             <div class="article-content mb-5">
-                <div class="text-break" 
-                    style="white-space: pre-line; line-height: 1.8; font-size: 1.1rem; color: #212529;">
+                <!-- 
+                  修改点：
+                  1. 移除了 style 中的 "white-space: pre-line;"。
+                     因为 Markdown 渲染出的 HTML 已经自带了段落结构，不需要强制换行。
+                  2. 保留了 font-size 等样式。
+                  3. 添加了 'markdown-body' 类（可选，如果你以后想引入类似 GitHub 的 markdown CSS 样式库）。
+                -->
+                <div class="text-break markdown-body" 
+                    style="line-height: 1.8; font-size: 1.1rem; color: #212529;">
+                    
                     <!-- 
-                    给这个 span 一个 ID，比如 post_body_XX
-                    这既是翻译的【源】，也是翻译的【目标】！
+                      关键修改：
+                      使用 | markdown | safe 过滤器。
+                      span 的 ID 必须保留，以便翻译脚本能找到它。
                     -->
-                    <span id="post{{ post.id }}">{{ post.body }}</span>
+                    <span id="post{{ post.id }}">
+                        {{ post.body | markdown | safe }}
+                    </span>
                 </div>
                 
-                <!-- 翻译链接 -->
+                <!-- 翻译链接 (逻辑保持不变) -->
                 {% if post.language and post.language != g.locale %}
-                <div class="mt-2 text-end"> <!-- 放在右下角，比较不显眼但好找 -->
+                <div class="mt-2 text-end"> 
                     <a href="javascript:void(0);" 
                     class="text-decoration-none small text-muted"
                     id="translate_link_{{ post.id }}"
