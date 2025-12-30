@@ -43,7 +43,7 @@ class PostForm(FlaskForm):
      # 【新增】标题输入框
     title = StringField(_l('Title'), validators=[DataRequired(), Length(min=5, max=30)])
     post = TextAreaField(_l('Say something'), validators=[
-        DataRequired(), Length(min=1, max=140)])
+        DataRequired(), Length(min=1, max=5000)])
     submit = SubmitField(_l('Submit'))
 
 

@@ -40,7 +40,11 @@ def add_to_index(index, model):
     #    - id=model.id: 【关键】使用 SQLAlchemy 模型的 ID 作为 Elasticsearch 文档的唯一 ID。
     #                   这使得两个数据库的记录可以一一对应。
     #    - document=payload: 要索引的文档内容。
-    current_app.elasticsearch.index(index=index, id=model.id, document=payload)
+    try:
+        current_app.elasticsearch.index(index=index, id=model.id, document=payload)
+    except Exception as e:
+        # 如果出错（比如连接失败），只打印错误日志，不要让程序崩溃
+        current_app.logger.error(f"Elasticsearch indexing failed: {e}")
 
 def remove_from_index(index, model):
     """
@@ -56,7 +60,10 @@ def remove_from_index(index, model):
     
     # 调用 Elasticsearch 客户端的 delete() 方法。
     # 通过传入索引名和与 SQLAlchemy 记录相同的 ID，来精确定位并删除文档。
-    current_app.elasticsearch.delete(index=index, id=model.id)
+    try:
+        current_app.elasticsearch.delete(index=index, id=model.id)
+    except Exception as e:
+        current_app.logger.error(f"Elasticsearch deletion failed: {e}")
 
 def query_index(index, query, page, per_page):
     """
@@ -78,32 +85,15 @@ def query_index(index, query, page, per_page):
         return [], 0
     
     # 调用 Elasticsearch 客户端的 search() 方法执行搜索。
-    search = current_app.elasticsearch.search(
-        index=index, # 指定在哪个索引中搜索
-        
-        # 定义查询体 (Query Body)
-        query={
-            'multi_match': { # 使用 'multi_match' 查询类型
-                'query': query,    # 用户的原始搜索词
-                'fields': ['*']  # 在【所有】可搜索字段中进行匹配 (由 `__searchable__` 决定)
-            }
-        },
-        
-        # 实现分页
-        # from_: 从第几条结果开始返回 (注意 'from' 是 Python 关键字，所以参数名带下划线)
-        # size:  本次查询最多返回多少条结果
-        from_=(page - 1) * per_page,
-        size=per_page
-    )
-    
-    # 从复杂的 Elasticsearch 响应中，提取出我们需要的 ID 列表。
-    # search['hits']['hits'] 是一个包含了所有命中结果的列表。
-    # hit['_id'] 是每个结果的文档 ID (它是一个字符串)。
-    # 我们使用列表推导式来遍历结果，并将字符串 ID 转换为整数。
-    ids = [int(hit['_id']) for hit in search['hits']['hits']]
-    
-    # 从响应中提取出匹配到的结果总数。
-    total = search['hits']['total']['value']
-    
-    # 返回 ID 列表和总数，供上层逻辑 (如 SearchableMixin) 使用。
-    return ids, total
+    try:
+        search = current_app.elasticsearch.search(
+            index=index,
+            query={'multi_match': {'query': query, 'fields': ['*']}},
+            from_=(page - 1) * per_page,
+            size=per_page)
+        ids = [int(hit['_id']) for hit in search['hits']['hits']]
+        return ids, search['hits']['total']['value']
+    except Exception as e:
+        # 如果搜索服务挂了，就返回空结果，而不是 500 错误
+        current_app.logger.error(f"Elasticsearch query failed: {e}")
+        return [], 0

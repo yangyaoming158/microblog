@@ -39,14 +39,14 @@
                 </h5>
 
                 <!-- 
-                【关键修改】
-                动态设置 class。
-                如果 is_detail_view 为 True，我们就不加 'post-excerpt' 这个类，这样内容就会完整显示。
-                否则（列表页），我们加上 'post-excerpt'，启用淡化截断。
+                1. 硬截断：后端只输出前 500 个字符。
+                    这保证了即使文章有一万字，传给浏览器的也只有 500 字，页面轻快。
+                2. class="post-excerpt": 应用我们之前写的淡化 CSS。
                 -->
-                <div class="{{ 'text-secondary' if is_detail_view else 'post-excerpt mb-2 text-secondary' }}">
-                    
-                    <span id="post{{ post.id }}">{{ post.body }}</span>
+                <div class="post-excerpt mb-2 text-secondary">
+                    <span id="post{{ post.id }}">
+                        {{ post.body | truncate(length=100, killwords=False, end='...') }}
+                    </span>
                 </div>
 
                 <!-- 

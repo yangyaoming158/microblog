@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-09-11 18:03+0800\n"
+"POT-Creation-Date: 2025-12-30 14:51+0800\n"
 "PO-Revision-Date: 2024-05-20 10:00+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -99,8 +99,8 @@ msgstr "您的密码已被重置。"
 msgid "About me"
 msgstr "关于我"
 
-#: app/main/forms.py:16 app/main/forms.py:45 app/main/forms.py:90
-#: app/main/forms.py:95
+#: app/main/forms.py:16 app/main/forms.py:47 app/main/forms.py:92
+#: app/main/forms.py:97
 msgid "Submit"
 msgstr "提交"
 
@@ -112,95 +112,100 @@ msgstr "新头像"
 msgid "Upload"
 msgstr "上传"
 
-#: app/main/forms.py:43
+#: app/main/forms.py:44
+msgid "Title"
+msgstr "标题"
+
+#: app/main/forms.py:45
 msgid "Say something"
 msgstr "说点什么"
 
-#: app/main/forms.py:57 app/main/routes.py:209 app/templates/base.html:74
+#: app/main/forms.py:59 app/main/routes.py:211 app/templates/base.html:74
 msgid "Search"
 msgstr "搜索"
 
-#: app/main/forms.py:89
+#: app/main/forms.py:91
 msgid "Comment"
 msgstr "评论"
 
-#: app/main/forms.py:93
+#: app/main/forms.py:95 app/templates/post_detail.html:182
 msgid "Message"
 msgstr "私信"
 
-#: app/main/routes.py:49
+#: app/main/routes.py:51
 msgid "Your post is now live!"
 msgstr "您的文章已成功发布！"
 
-#: app/main/routes.py:59 app/templates/base.html:51
+#: app/main/routes.py:61 app/templates/base.html:51
 msgid "Home"
 msgstr "首页"
 
-#: app/main/routes.py:76 app/templates/base.html:54
+#: app/main/routes.py:78 app/templates/base.html:54
 msgid "Explore"
 msgstr "发现"
 
-#: app/main/routes.py:111
+#: app/main/routes.py:113
 msgid "Your changes have been saved."
 msgstr "您的更改已保存。"
 
-#: app/main/routes.py:116 app/templates/edit_profile.html:5
+#: app/main/routes.py:118 app/templates/edit_profile.html:5
 msgid "Edit Profile"
 msgstr "编辑个人资料"
 
-#: app/main/routes.py:128 app/main/routes.py:149
+#: app/main/routes.py:130 app/main/routes.py:151
 #, python-format
 msgid "User %(username)s not found."
 msgstr "用户 %(username)s 未找到。"
 
-#: app/main/routes.py:131
+#: app/main/routes.py:133
 msgid "You cannot follow yourself!"
 msgstr "您不能关注自己！"
 
-#: app/main/routes.py:135
+#: app/main/routes.py:137
 #, python-format
 msgid "You are following %(username)s!"
 msgstr "您正在关注 %(username)s！"
 
-#: app/main/routes.py:152
+#: app/main/routes.py:154
 msgid "You cannot unfollow yourself!"
 msgstr "您不能取消关注自己！"
 
-#: app/main/routes.py:156
+#: app/main/routes.py:158
 #, python-format
 msgid "You are not following %(username)s."
 msgstr "您没有关注 %(username)s。"
 
-#: app/main/routes.py:234
+#: app/main/routes.py:236
 msgid "Your post has been deleted!"
 msgstr "您的文章已被删除！"
 
-#: app/main/routes.py:260
+#: app/main/routes.py:263
 msgid "Your comment has been published."
 msgstr "您的评论已发布。"
 
-#: app/main/routes.py:359
+#: app/main/routes.py:368
 msgid "Your message has been sent."
 msgstr "您的私信已发送。"
 
-#: app/main/routes.py:416
+#: app/main/routes.py:425
 msgid "Your avatar has been updated!"
 msgstr "您的头像已更新！"
 
-#: app/templates/_post.html:21
+#: app/templates/_message.html:41 app/templates/base.html:189
+#: app/templates/post_detail.html:104
+msgid "Translate"
+msgstr "翻译"
+
+#: app/templates/_post.html:23
 #, python-format
 msgid "%(username)s said %(when)s"
 msgstr "%(username)s 发表于 %(when)s"
 
-#: app/templates/_post.html:29
-msgid "comment zone"
-msgstr "回帖"
+#: app/templates/_post.html:61
+msgid "Read more"
+msgstr "了解更多"
 
-#: app/templates/_post.html:53
-msgid "Translate"
-msgstr "翻译"
-
-#: app/templates/_post.html:77
+#: app/templates/_post.html:88
 msgid "Delete"
 msgstr "删除"
 
@@ -224,89 +229,152 @@ msgstr "登出"
 msgid "Messages"
 msgstr "私信"
 
+#: app/templates/base.html:154
+#, fuzzy
+msgid "Translating..."
+msgstr "翻译"
+
+#: app/templates/base.html:176
+msgid "Show Original"
+msgstr "显示原文"
+
+#: app/templates/base.html:187
+#, fuzzy
+msgid "Translation failed"
+msgstr "翻译"
+
+#: app/templates/base.html:195
+#, fuzzy
+msgid "Retry"
+msgstr "注册"
+
 #: app/templates/conversation.html:4
 #, python-format
 msgid "Messages with %(username)s"
 msgstr "与 %(username)s 的对话"
 
-#: app/templates/conversation.html:27 app/templates/messages.html:43
+#: app/templates/conversation.html:26 app/templates/messages.html:43
 msgid "Newer messages"
 msgstr "较新的私信"
 
-#: app/templates/conversation.html:32 app/templates/messages.html:48
+#: app/templates/conversation.html:31 app/templates/messages.html:48
 msgid "Older messages"
 msgstr "较早的私信"
 
-#: app/templates/index.html:5
+#: app/templates/index.html:6
 #, python-format
 msgid "Hi, %(username)s!"
 msgstr "你好, %(username)s！"
 
-#: app/templates/index.html:16 app/templates/search.html:12
-#: app/templates/user.html:114
-msgid "Newer posts"
+#: app/templates/index.html:12
+#, fuzzy
+msgid "New Post"
 msgstr "较新的文章"
 
-#: app/templates/index.html:21 app/templates/search.html:17
-#: app/templates/user.html:120
-msgid "Older posts"
+#: app/templates/index.html:21
+msgid "Give your post a title..."
+msgstr "请为你的帖子命名"
+
+#: app/templates/index.html:31
+msgid "What's on your mind?"
+msgstr "你有什么想法？"
+
+#: app/templates/index.html:57
+#, fuzzy
+msgid "Newer post"
+msgstr "较新的文章"
+
+#: app/templates/index.html:62
+#, fuzzy
+msgid "Older post"
 msgstr "较早的文章"
 
 #: app/templates/messages.html:32
 msgid "Chat"
 msgstr "聊天"
 
-#: app/templates/post_detail.html:25
+#: app/templates/post_detail.html:11
+msgid "Untitled"
+msgstr "未命名的标题"
+
+#: app/templates/post_detail.html:16
+msgid "Posted by"
+msgstr "发帖者"
+
+#: app/templates/post_detail.html:45
+#, python-format
+msgid "Translate to %(language)s"
+msgstr "翻译为 %(language)s"
+
+#: app/templates/post_detail.html:52
 msgid "Comments"
 msgstr "评论"
 
-#: app/templates/post_detail.html:52
-msgid "Previous Comments"
-msgstr "上一页评论"
+#: app/templates/post_detail.html:60
+msgid "Leave a comment..."
+msgstr "留下一个评论..."
 
-#: app/templates/post_detail.html:55
-msgid "Next Comments"
-msgstr "下一页评论"
+#: app/templates/post_detail.html:118
+msgid "Prev"
+msgstr "上一页"
+
+#: app/templates/post_detail.html:121
+msgid "Next"
+msgstr "下一页"
+
+#: app/templates/post_detail.html:134
+msgid "About the Author"
+msgstr "关于作者"
+
+#: app/templates/post_detail.html:173 app/templates/user.html:72
+#: app/templates/user_popup.html:15
+msgid "Follow"
+msgstr "关注"
+
+#: app/templates/post_detail.html:178 app/templates/user.html:81
+#: app/templates/user_popup.html:22
+msgid "Unfollow"
+msgstr "取消关注"
 
 #: app/templates/search.html:4
 msgid "Search Results"
 msgstr "搜索结果"
 
-#: app/templates/user.html:33
+#: app/templates/search.html:12 app/templates/user.html:119
+msgid "Newer posts"
+msgstr "较新的文章"
+
+#: app/templates/search.html:17 app/templates/user.html:125
+msgid "Older posts"
+msgstr "较早的文章"
+
+#: app/templates/user.html:38
 msgid "Change Avatar"
 msgstr "更换头像"
 
-#: app/templates/user.html:41
+#: app/templates/user.html:46
 msgid "User"
 msgstr "用户"
 
-#: app/templates/user.html:47 app/templates/user_popup.html:7
+#: app/templates/user.html:52 app/templates/user_popup.html:7
 msgid "Last seen on"
 msgstr "上次在线于"
 
-#: app/templates/user.html:50 app/templates/user_popup.html:9
+#: app/templates/user.html:55 app/templates/user_popup.html:9
 #, python-format
 msgid "%(count)d followers"
 msgstr "%(count)d 粉丝"
 
-#: app/templates/user.html:50 app/templates/user_popup.html:9
+#: app/templates/user.html:55 app/templates/user_popup.html:9
 #, python-format
 msgid "%(count)d following"
 msgstr "正在关注 %(count)d"
 
-#: app/templates/user.html:59
+#: app/templates/user.html:64
 msgid "Edit your profile"
 msgstr "编辑你的个人资料"
 
-#: app/templates/user.html:67 app/templates/user_popup.html:15
-msgid "Follow"
-msgstr "关注"
-
-#: app/templates/user.html:76 app/templates/user_popup.html:22
-msgid "Unfollow"
-msgstr "取消关注"
-
-#: app/templates/user.html:84
+#: app/templates/user.html:89
 msgid "Send private message"
 msgstr "发送私信"
 
@@ -357,3 +425,13 @@ msgstr "管理员已收到通知。对您造成的不便，我们深表歉意！
 
 #~ msgid "Send Message to %(recipient)s"
 #~ msgstr "发送私信给 %(recipient)s"
+
+#~ msgid "comment zone"
+#~ msgstr "回帖"
+
+#~ msgid "Previous Comments"
+#~ msgstr "上一页评论"
+
+#~ msgid "Next Comments"
+#~ msgstr "下一页评论"
+
