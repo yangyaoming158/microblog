@@ -141,62 +141,59 @@
 
     <script> 
 
-    // 1. 定义一个名为 'translate' 的异步函数
-    //    - async: 这个关键字表示该函数内部可以包含 'await' 操作，它会自动处理异步流程。
-    //    - 它接收四个参数，这些参数将由 HTML 中的 onclick 事件在调用时传入。
-    //      - sourceElem: 源文本元素的 ID 字符串 (例如: 'post5')
-    //      - destElem:   目标容器元素的 ID 字符串 (例如: 'translation5')
-    //      - sourceLang: 源语言代码 (例如: 'es')
-    //      - destLang:   目标语言代码 (例如: 'zh')
-    async function translate(sourceElem, destElem, sourceLang, destLang) {
-
-        // 2. 提供即时反馈：显示“加载中”动画
-        //    - document.getElementById(destElem): 在整个 HTML 页面中，找到 ID 为 destElem ('translation5') 的那个 <span> 元素。
-        //    - .innerHTML = '...': 将这个 <span> 元素【内部的 HTML 内容】完全替换成一个新的 <img> 标签。
-        //      - url_for(...): 这部分在服务器端已经被 Jinja2 渲染成了真实的图片路径，如 '/static/loading.gif'。
-        //    - 效果：用户一点击“翻译”，原来的“翻译”链接就立刻消失，变成了一个旋转的加载动画，用户体验很好。
-        document.getElementById(destElem).innerHTML = 
-          '<img src="{{ url_for('static', filename='loading.gif') }}">';
-
-        // 3. 使用 fetch API 向后端发送异步请求
-        //    - const response = await fetch(...): 
-        //      - fetch(): 这是浏览器内置的、用于发送网络请求的现代函数。
-        //      - await: 暂停函数的执行，直到 fetch() 完成网络请求并返回一个响应对象 (response) 后，再继续向下执行。
-        //        这使得异步代码写起来像同步代码一样直观。
-        const response = await fetch('/translate', {
-          // a. 请求的方法：POST
-          method: 'POST',
-          
-          // b. 请求头 (Headers):
-          //    告诉服务器我们发送的数据是什么格式。
-          headers: {'Content-Type': 'application/json; charset=utf-8'},
-          
-          // c. 请求体 (Body):
-          //    这里包含了我们要发送给后端的核心数据。
-          body: JSON.stringify({ // JSON.stringify() 将一个 JavaScript 对象转换成 JSON 格式的字符串。
-            
-            // 从源元素中获取要翻译的文本
-            text: document.getElementById(sourceElem).innerText, 
-            
-            // 传入从 onclick 中获取的源语言和目标语言
-            source_language: sourceLang,
-            dest_language: destLang
-          })
-        });
-
-        // 4. 解析后端返回的 JSON 响应
-        //    - const data = await response.json();
-        //      - response.json(): 这是响应对象的一个方法，它会读取响应体并将其解析为一个 JavaScript 对象。
-        //      - await: 再次暂停，直到 JSON 解析完成。
-        //      - data 变量现在是一个 JavaScript 对象，形如 { text: "翻译好的文本" }。
-        const data = await response.json();
+      async function translate_replace(elemId, sourceLang, destLang, linkElem) {
+        const textElem = document.getElementById(elemId);
         
-        // 5. 将翻译结果更新到页面上
-        //    - document.getElementById(destElem): 再次找到那个目标 <span> 容器。
-        //    - .innerText = data.text: 将这个 <span> 元素【内部的文本内容】替换成从服务器返回的翻译结果。
-        //      - innerText 会自动处理 HTML 转义，比 innerHTML 更安全。
-        //    - 效果：加载动画消失，取而代之的是翻译好的文本。
-        document.getElementById(destElem).innerText = data.text;
+        // 1. 获取原文
+        const originalText = textElem.innerText;
+        
+        // 2. 显示加载状态
+        //    这里我们不替换图片，而是把文本变灰，或者显示一个 loading spinner
+        const originalHtml = textElem.innerHTML; // 保存原始 HTML 以便恢复（可选）
+        textElem.style.opacity = '0.5';
+        linkElem.innerText = "{{ _('Translating...') }}";
+
+        try {
+            // 3. 发送翻译请求
+            const response = await fetch('/translate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json; charset=utf-8'},
+                body: JSON.stringify({
+                    text: originalText,
+                    source_language: sourceLang,
+                    dest_language: destLang
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.text && !data.text.startsWith('Error:')) {
+                // 4. 【核心】用译文直接替换原文
+                textElem.innerText = data.text;
+                textElem.style.opacity = '1';
+                
+                // 5. 修改链接文字，或者隐藏链接
+                linkElem.innerText = "{{ _('Show Original') }}";
+                
+                // (进阶) 你可以把 onclick 改成“恢复原文”的逻辑
+                // 这里为了简单，先不写复杂的 toggle 逻辑
+                linkElem.onclick = function() {
+                    textElem.innerHTML = originalHtml; // 恢复
+                    textElem.style.opacity = '1';
+                    linkElem.remove(); // 恢复后移除链接，或者重置为翻译按钮
+                };
+                
+            } else {
+                alert("{{ _('Translation failed') }}");
+                textElem.style.opacity = '1';
+                linkElem.innerText = "{{ _('Translate') }}";
+            }
+            
+        } catch (e) {
+            console.error(e);
+            textElem.style.opacity = '1';
+            linkElem.innerText = "{{ _('Retry') }}";
+        }
     }
 
     // 1. 定义一个用于初始化 popover 的函数

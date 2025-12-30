@@ -1,0 +1,39 @@
+
+    /* 帖子摘要容器 */
+    .post-excerpt {
+        position: relative; /* 为绝对定位的遮罩层提供参照 */
+        max-height: 4.5em;  /* 【关键】限制高度：大约显示 3 行 (1.5em * 3) */
+        overflow: hidden;   /* 隐藏超出的文字 */
+        line-height: 1.5em; /* 设置行高 */
+    }
+
+    /* 底部淡出遮罩层 (Fade Out Effect) */
+    .post-excerpt::after {
+        content: "";
+        text-align: right;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 2em; /* 遮罩层的高度 */
+        
+        /* 【核心魔法】制作一个从透明到白色的渐变 */
+        /* 注意：如果你的网页背景不是白色，请将 white 改为你的背景色 */
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 90%);
+        pointer-events: none; /* 让遮罩层不影响点击下面的文字 */
+    }
+    
+    /* 帖子标题样式 */
+    .post-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #333;
+        text-decoration: none;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .post-title:hover {
+        text-decoration: underline;
+        color: #0056b3;
+    }

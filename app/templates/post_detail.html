@@ -1,70 +1,194 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <!-- 1. 使用 _post.html 子模板来显示帖子本身的内容 -->
-    {% include '_post.html' %}
-
-    <hr>
-
-    <!-- 2. 显示发表新评论的表单 -->
-    <!-- 这个表单会 POST 到当前的 URL, 即 /post/<post_id> -->
-    <form action="" method="post">
-        {{ form.hidden_tag() }} <!-- CSRF 令牌 -->
-        <p>
-            {{ form.body.label }}<br>
-            {{ form.body(rows=4, class_='form-control') }}
-            <!-- 显示字段验证错误 -->
-            {% for error in form.body.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>{{ form.submit(class_='btn btn-primary') }}</p>
-    </form>
-
-    <hr>
-    <h3>{{ _('Comments') }}</h3>
-    
-    <!-- 3. 显示评论列表 -->
-    <!-- 
-      遍历从后端传来的 'comments' 列表 (这是分页后的当页评论)
-      我们在这里可以创建一个新的子模板 _comment.html 来复用，也可以直接写
-    -->
-    {% for comment in comments %}
-    <div style="margin-top: 15px;">
-        <a href="{{ url_for('main.user', username=comment.author.username) }}">
-        <img src="{{ comment.author.avatar(36) }}" 
-            style="
-                width: 36px; 
-                height: 36px; 
-                object-fit: cover; 
-                object-position: center; 
-                border-radius: 50%;         /* 【关键】变成圆形 */
-                vertical-align: middle; 
-                margin-right: 8px;          /* 添加右边距，让头像和名字有点间隔 */
-                border: 1px solid #dee2e6;  /* 可选：加一个淡淡的灰色边框，增加精致感 */
-            "
-            alt="{{ comment.author.username }}"> <!-- 添加 alt 属性是好习惯 -->
-        </a>
-        <strong>
-            <a class="user_popup" href="{{ url_for('main.user', username=comment.author.username) }}">
-                {{ comment.author.username }}
-            </a>
-        </strong>
-        <small>{{ moment(comment.timestamp).fromNow() }}</small>
-        <p>{{ comment.body }}</p>
+<div class="container mt-4">
+    <div class="row">
         
+        <!-- ================= 左侧：文章主体 (8/12) ================= -->
+        <div class="col-md-8">
+            
+            <!-- 1. 文章标题 -->
+            <h1 class="mb-2 fw-bold display-6">{{ post.title or _("Untitled") }}</h1>
+            
+            <!-- 2. 文章元数据 (作者、时间、翻译) -->
+            <div class="text-muted mb-4 small">
+                <span>
+                    {{ _('Posted by') }} 
+                    <a href="{{ url_for('main.user', username=post.author.username) }}" class="text-decoration-none fw-bold">
+                        {{ post.author.username }}
+                    </a>
+                </span>
+                <span class="mx-2">&bull;</span>
+                <span>{{ moment(post.timestamp).format('LL') }}</span>
+                
+                
+            </div>
+
+            <!-- 3. 文章正文 -->
+            <div class="article-content mb-5">
+                <div class="text-break" 
+                    style="white-space: pre-line; line-height: 1.8; font-size: 1.1rem; color: #212529;">
+                    <!-- 
+                    给这个 span 一个 ID，比如 post_body_XX
+                    这既是翻译的【源】，也是翻译的【目标】！
+                    -->
+                    <span id="post{{ post.id }}">{{ post.body }}</span>
+                </div>
+                
+                <!-- 翻译链接 -->
+                {% if post.language and post.language != g.locale %}
+                <div class="mt-2 text-end"> <!-- 放在右下角，比较不显眼但好找 -->
+                    <a href="javascript:void(0);" 
+                    class="text-decoration-none small text-muted"
+                    id="translate_link_{{ post.id }}"
+                    onclick="translate_replace('post{{ post.id }}', '{{ post.language }}', '{{ g.locale }}', this);">
+                        <i class="bi bi-translate"></i> {{ _('Translate to %(language)s', language=g.locale) }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 4. 评论区 -->
+            <h4 class="mb-4">{{ _('Comments') }}</h4>
+            
+            <!-- (A) 发表评论表单 -->
+            <div class="card mb-4 bg-light border-0">
+                <div class="card-body">
+                    <form action="" method="post">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ form.body(rows=3, class_='form-control', placeholder=_("Leave a comment...")) }}
+                            {% for error in form.body.errors %}
+                            <span class="text-danger small">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="text-end">
+                            {{ form.submit(class_='btn btn-primary btn-sm') }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- (B) 评论列表 (直接渲染，不使用 include) -->
+            <div class="comments-list">
+                {% for comment in comments %}
+                <div class="d-flex mb-4">
+                    <!-- 评论者头像 -->
+                    <div class="flex-shrink-0">
+                        <a href="{{ url_for('main.user', username=comment.author.username) }}">
+                            <img src="{{ comment.author.avatar(48) }}" 
+                                 class="rounded-circle border" 
+                                 style="width: 48px; height: 48px; object-fit: cover;"
+                                 alt="{{ comment.author.username }}">
+                        </a>
+                    </div>
+                    <!-- 评论内容主体 -->
+                    <div class="flex-grow-1 ms-3">
+                        <div class="mb-1">
+                            <a href="{{ url_for('main.user', username=comment.author.username) }}" class="fw-bold text-dark text-decoration-none">
+                                {{ comment.author.username }}
+                            </a>
+                            <small class="text-muted ms-2">{{ moment(comment.timestamp).fromNow() }}</small>
+                        </div>
+                        <div class="text-break" style="white-space: pre-line;">
+                            <span id="comment{{ comment.id }}">{{ comment.body }}</span>
+                        </div>
+                        
+                        <!-- 评论翻译 (可选) -->
+                        {% if comment.language and comment.language != g.locale %}
+                            <div class="mt-1 small">
+                                <span id="translation_comment_{{ comment.id }}">
+                                    <a href="javascript:void(0);" 
+                                       onclick="translate('comment{{ comment.id }}', 'translation_comment_{{ comment.id }}', '{{ comment.language }}', '{{ g.locale }}');"
+                                       class="text-decoration-none text-muted">
+                                        {{ _('Translate') }}
+                                    </a>
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- (C) 评论分页 -->
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                        <a class="page-link" href="{{ prev_url or '#' }}">&larr; {{ _('Prev') }}</a>
+                    </li>
+                    <li class="page-item{% if not next_url %} disabled{% endif %}">
+                        <a class="page-link" href="{{ next_url or '#' }}">{{ _('Next') }} &rarr;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- ================= 右侧：侧边栏 (4/12) ================= -->
+        <div class="col-md-4">
+            <div class="position-sticky" style="top: 2rem;">
+                
+                <!-- 作者信息卡片 -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white fw-bold">
+                        {{ _('About the Author') }}
+                    </div>
+                    <div class="card-body text-center pt-4">
+                        <a href="{{ url_for('main.user', username=post.author.username) }}">
+                            <img src="{{ post.author.avatar(128) }}" 
+                                 class="rounded-circle mb-3 border" 
+                                 style="width: 100px; height: 100px; object-fit: cover;">
+                        </a>
+                        
+                        <h5 class="card-title mb-1">
+                            <a href="{{ url_for('main.user', username=post.author.username) }}" class="text-dark text-decoration-none">
+                                {{ post.author.username }}
+                            </a>
+                        </h5>
+                        
+                        {% if post.author.about_me %}
+                        <p class="card-text text-muted small px-3 mt-2 mb-3">
+                            {{ post.author.about_me }}
+                        </p>
+                        {% endif %}
+                        
+                        <!-- 统计数据 -->
+                        <div class="d-flex justify-content-center gap-4 mb-3 text-muted small">
+                            <div class="text-center">
+                                <div class="fw-bold fs-6 text-dark">{{ post.author.followers_count() }}</div>
+                                <div>Followers</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="fw-bold fs-6 text-dark">{{ post.author.following_count() }}</div>
+                                <div>Following</div>
+                            </div>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        {% if current_user.is_authenticated and post.author != current_user %}
+                            <div class="d-grid gap-2 px-3 pb-2">
+                                {% if not current_user.is_following(post.author) %}
+                                    <form action="{{ url_for('main.follow', username=post.author.username) }}" method="post">
+                                        {{ empty_form.hidden_tag() }}
+                                        <button type="submit" class="btn btn-outline-primary btn-sm w-100">{{ _('Follow') }}</button>
+                                    </form>
+                                {% else %}
+                                    <form action="{{ url_for('main.unfollow', username=post.author.username) }}" method="post">
+                                        {{ empty_form.hidden_tag() }}
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm w-100">{{ _('Unfollow') }}</button>
+                                    </form>
+                                {% endif %}
+                                <a href="{{ url_for('main.conversation', username=post.author.username) }}" class="btn btn-primary btn-sm w-100">
+                                    {{ _('Message') }}
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
-    {% endfor %}
-    
-    <!-- 4. 显示评论的分页导航 -->
-    <nav aria-label="Comment navigation">
-        <ul class="pagination">
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <a class="page-link" href="{{ prev_url or '#' }}">{{ _('Previous Comments') }}</a>
-            </li>
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class="page-link" href="{{ next_url or '#' }}">{{ _('Next Comments') }}</a>
-            </li>
-        </ul>
-    </nav>
+</div>
 {% endblock %}

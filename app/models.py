@@ -313,8 +313,12 @@ class Post(SearchableMixin,db.Model):
     # 一篇帖子下的所有评论
     comments: so.WriteOnlyMapped['Comment'] = so.relationship(
         back_populates='post', lazy='dynamic', cascade='all, delete-orphan',passive_deletes=True)
+    # 【新增】标题字段
+    # 设置 default='' 确保旧帖子在迁移时不会报错，nullable=False 强制要求有标题（哪怕是空的）
+    title: so.Mapped[str] = so.mapped_column(sa.String(100), default='', nullable=False)
 
     __searchable__ = ['body']
+
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)

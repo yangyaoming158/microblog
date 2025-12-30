@@ -1,26 +1,55 @@
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as wtf %}
+<!-- 如果你不再使用 wtf.quick_form，这行 import 其实可以删掉了 -->
+{# {% import "bootstrap_wtf.html" as wtf %} #}
 
 {% block content %}
     <h1>{{ _('Hi, %(username)s!', username=current_user.username) }}</h1>
+    
+    <!-- 【新增】手动渲染表单 -->
     {% if form %}
-    {{ wtf.quick_form(form) }}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ _('New Post') }}</h5>
+            <form action="" method="post">
+                {{ form.hidden_tag() }}
+                
+                <!-- 1. 标题输入框 -->
+                <div class="mb-3">
+                    {{ form.title.label(class="form-label") }}
+                    <!-- 加上 class="form-control" 让它有 Bootstrap 样式 -->
+                    <!-- placeholder 提示用户输入标题 -->
+                    {{ form.title(class="form-control", placeholder=_("Give your post a title...")) }}
+                    <!-- 显示错误信息 -->
+                    {% for error in form.title.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+            
+                <!-- 2. 内容输入框 -->
+                <div class="mb-3">
+                    {{ form.post.label(class="form-label") }}
+                    {{ form.post(rows=3, class="form-control", placeholder=_("What's on your mind?")) }}
+                    {% for error in form.post.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+                
+                <!-- 3. 提交按钮 -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
     {% endif %}
+
+    <!-- 帖子列表 -->
     {% for post in posts %}
         {% include '_post.html' %}
     {% endfor %}
+
+    <!-- 分页导航 (保持不变) -->
     <nav aria-label="Post navigation">
-        <ul class="pagination">
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <a class="page-link" href="{{ prev_url }}">
-                    <span aria-hidden="true">&larr;</span> {{ _('Newer posts') }}
-                </a>
-            </li>
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class="page-link" href="{{ next_url }}">
-                    {{ _('Older posts') }} <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
+       ...
     </nav>
 {% endblock %}

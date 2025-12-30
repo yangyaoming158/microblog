@@ -1,0 +1,48 @@
+<table class="table table-hover">
+    <tr valign="top">
+        <td width="70px">
+            <a href="{{ url_for('main.user', username=message.author.username) }}">
+                <img src="{{ message.author.avatar(70) }}" 
+                     class="rounded" 
+                     style="width: 70px; height: 70px; object-fit: cover; object-position: center;"/>
+            </a>
+        </td>
+        <td>
+            <!-- 1. 头部信息：用户名 + 时间 -->
+            <small class="text-muted">
+                <a href="{{ url_for('main.user', username=message.author.username) }}" 
+                   class="fw-bold text-decoration-none text-dark">
+                    {{ message.author.username }}
+                </a>
+                
+                <span class="mx-1">&bull;</span>
+                
+                {{ moment(message.timestamp).fromNow() }}
+            </small>
+
+            <!-- 
+              2. 【核心修改】私信正文
+              - 移除了标题 (h5)
+              - 移除了淡化类 (post-excerpt)
+              - 使用 pre-wrap 保留换行，显示全文
+            -->
+            <div class="mt-2 text-break" style="white-space: pre-wrap; font-size: 1.05em; line-height: 1.6;">
+                <span id="message{{ message.id }}">{{ message.body }}</span>
+            </div>
+            
+            <!-- 3. 翻译功能 (保留) -->
+            <!-- 注意：这里使用的是 message 对象，而不是 post -->
+            {% if message.language and message.language != g.locale %}
+            <div class="mt-2">
+                <span id="translation{{ message.id }}">
+                    <a href="javascript:void(0);" 
+                       class="text-decoration-none small"
+                       onclick="translate('message{{ message.id }}', 'translation{{ message.id }}', '{{ message.language }}', '{{ g.locale }}');">
+                        {{ _('Translate') }}
+                    </a>
+                </span>
+            </div>
+            {% endif %}
+        </td>
+    </tr>
+</table>

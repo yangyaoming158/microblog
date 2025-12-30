@@ -1,5 +1,6 @@
 <table class="table table-hover">
         <tr>
+            
             <td width="70px">
                 <a href="{{ url_for('main.user', username=post.author.username) }}"> <!-- 使得点击头像也可以进入用户的主页 -->
                     <img src="{{ post.author.avatar(70) }}" 
@@ -21,40 +22,49 @@
                 <!-- 使用 Flask-Moment 将 UTC 时间转换为本地化时间对应的距离当前时间长度 (例如: July 20, 2025 10:30 PM) -->
                 {{ _('%(username)s said %(when)s',
                     username=user_link, when=moment(post.timestamp).fromNow()) }}
-                <br>
-                <span id="post{{ post.id }}">{{ post.body }}</span>
+                <!-- <br>
+                <span id="post{{ post.id }}">{{ post.body }}</span> -->
 
-                <!-- 【新增/修改】在帖子正文下方添加一个永久链接 -->
-                {% if show_comment_link is not defined or show_comment_link %}
-                <p>
-                    <a href="{{ url_for('main.post', post_id=post.id) }}">{{ _('comment zone') }}</a>
-                </p>
-                {% endif %}
-
-                {% if post.language and post.language != g.locale %}
-                <br><br>
-                <!-- 这是一个 span 元素，它的作用是作为一个【容器】 -->
-                <!-- id="translation{{ post.id }}":
-                    - 我们给这个容器一个唯一的 ID，比如 "translation5"。
-                    - 这样，我们的 JavaScript 代码在收到翻译结果后，就能精确地找到这个容器，
-                    并把它的内容（也就是下面的 <a> 链接）替换成翻译好的文本。
+                                <!-- 
+                  【新增区域开始】
+                  这里是标题和带淡出效果的摘要 
                 -->
-                <span id="translation{{ post.id }}">
-                    <!-- 这是一个超链接 a 元素，但它的作用不是跳转，而是作为可点击的“按钮”
-                     - 当这个链接被点击时，不要去跳转到一个新的网页，而是去执行后面跟着的这段 JavaScript 代码(传参到base文件中的translate函数) 
-                     - 第一个参数 (sourceElem): 帖子的源文本元素的 ID。
-                     - 第二个参数 (destElem): 翻译结果要被插入的目标容器的 ID。
-                     - 第三个参数 (sourceLang): 帖子的源语言代码。（spa）
-                     - 第四个参数 (destLang): 当前用户的目标语言代码。（zh）
-                     -->
-                    <a href="javascript:translate(
-                                'post{{ post.id }}',
-                                'translation{{ post.id }}',
-                                '{{ post.language }}',
-                                '{{ g.locale }}');">{{ _('Translate') }}</a>
-                </span>
+                
+                <!-- 2. 帖子标题 -->
+                <!--    使用 h5 标签让标题更醒目，点击标题进入详情页 -->
+                <h5 class="mt-2">
+                    <a href="{{ url_for('main.post', post_id=post.id) }}" class="text-decoration-none text-dark">
+                        {{ post.title or "Untitled" }}
+                    </a>
+                </h5>
+
+                <!-- 
+                【关键修改】
+                动态设置 class。
+                如果 is_detail_view 为 True，我们就不加 'post-excerpt' 这个类，这样内容就会完整显示。
+                否则（列表页），我们加上 'post-excerpt'，启用淡化截断。
+                -->
+                <div class="{{ 'text-secondary' if is_detail_view else 'post-excerpt mb-2 text-secondary' }}">
+                    
+                    <span id="post{{ post.id }}">{{ post.body }}</span>
+                </div>
+
+                <!-- 
+                【关键修改】
+                "Read more" 按钮只在列表页显示。
+                在详情页，我们不需要这个按钮。
+                -->
+                {% if not is_detail_view %}
+                    {% if show_comment_link is not defined or show_comment_link %}
+                    <p>
+                        <a href="{{ url_for('main.post', post_id=post.id) }}" class="btn btn-outline-primary btn-sm">
+                            {{ _('Read more') }} &rarr;
+                        </a>
+                    </p>
+                    {% endif %}
                 {% endif %}
-                    <!-- 【在这里添加新的代码块】 -->
+                <!-- 【新增区域结束】 -->
+                <!-- 【在这里添加新的代码块】 -->
                 <!-- 
                 条件判断：只有当帖子的作者 (post.author)
                 是当前登录的用户 (current_user) 时，才显示“删除”按钮。

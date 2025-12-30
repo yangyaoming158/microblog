@@ -42,7 +42,9 @@ def index():
                 language = language.split('-')[0]
         except LangDetectException:
             language = ''
-        post = Post(body=form.post.data, author=current_user,
+        post = Post(title=form.title.data,  # 【新增】保存标题
+                    body=form.post.data, 
+                    author=current_user,
                     language=language)
         db.session.add(post)
         db.session.commit()
@@ -251,6 +253,7 @@ def post(post_id):
     if form.validate_on_submit():
         # 创建一个新的 Comment 对象
         comment = Comment(
+            
             body=form.body.data,
             author=current_user,
             post=post, # 直接将 post 对象关联起来
@@ -276,10 +279,16 @@ def post(post_id):
     prev_url = url_for('main.post', post_id=post.id, page=comments.prev_num) \
         if comments.has_prev else None
     
-    # 6. 渲染模板，并把所有需要的数据都传递过去
+    # 【新增步骤 1】实例化 EmptyForm
+    # 这个表单用于侧边栏的 关注/取消关注 按钮 (以及之前的删除按钮)
+    empty_form = EmptyForm()
+
     return render_template('post_detail.html', title=post.body, post=post,
                            comments=comments.items, form=form,
-                           next_url=next_url, prev_url=prev_url)
+                           next_url=next_url, prev_url=prev_url,
+                           
+                           # 【新增步骤 2】将 empty_form 传递给模板
+                           empty_form=empty_form)
 
 #根据给定的 username，获取 user 对象
 #然后把它“填充”到一个专门为弹窗设计的、小巧的 HTML 模板中，并把最终生成的 HTML 片段作为响应返回
