@@ -313,7 +313,10 @@ def messages():
     # 获取所有与我相关的用户ID，并去重
     user_ids = list(set(db.session.scalars(sent_to_q).all() + db.session.scalars(received_from_q).all()))
     if not user_ids:
-        users = []
+        # 如果没有对话伙伴，直接返回一个空的分页对象或者空列表
+        # 这里我们手动模拟一个空的分页结果，或者直接渲染模板并传入空列表
+        # 最简单的做法是直接传空列表给模板，让模板显示“暂无消息”
+        return render_template('messages.html', users=[], next_url=None, prev_url=None)
         
     else:
         # 查询这些用户，未来可以按最后消息时间排序

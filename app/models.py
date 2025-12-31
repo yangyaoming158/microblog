@@ -169,6 +169,27 @@ class User(UserMixin, db.Model):
         n = Notification(name=name, payload_json=json.dumps(data), user=self)
         db.session.add(n)
         return n
+    # 【新增方法】计算来自特定用户的未读消息数
+    def new_messages_from(self, sender):
+        """
+        计算当前用户收到的、来自 'sender' 用户且未读的消息数量。
+        """
+        # 1. 获取最后一次读取时间 (如果没有则默认为很久以前)
+        last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
+        
+        # 2. 构建查询
+        #    - Message.recipient == self: 接收者必须是我
+        #    - Message.sender_id == sender.id: 发送者必须是指定的那个用户
+        #    - Message.timestamp > last_read_time: 消息时间必须晚于我上次读消息的时间
+        query = sa.select(Message).where(
+            Message.recipient == self,
+            Message.sender_id == sender.id,  # 【关键差异点】
+            Message.timestamp > last_read_time
+        )
+        
+        # 3. 执行计数查询并返回
+        return db.session.scalar(sa.select(sa.func.count()).select_from(
+            query.subquery()))
 
     
 

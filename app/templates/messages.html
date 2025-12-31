@@ -7,47 +7,63 @@
       使用 Bootstrap 的 list-group 来创建一个更美观的列表。
       list-group-flush 可以移除边框，让它更简洁。
     -->
-    <div class="list-group list-group-flush">
-        <!-- 遍历从后端传来的 'users' (对话伙伴) 列表 -->
-        {% for user in users %}
-            <!-- 
-              【核心布局修改】
-              - d-flex: 启用 Flexbox 布局。
-              - justify-content-between: 核心！让内部元素两端对齐。
-              - align-items-center: 让内部元素垂直居中。
-            -->
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-                
-                <!-- 1. 左侧部分：头像和用户名，链接到【个人资料页】 -->
-                <div>
-                    <a class="user_popup" href="{{ url_for('main.user', username=user.username) }}">
-                        <img src="{{ user.avatar(48) }}" class="rounded-circle" style="vertical-align: middle; margin-right: 10px;">
-                        <strong style="font-size: 1.2em;">{{ user.username }}</strong>
-                    </a>
-                </div>
+    {% if users %}
+        <div class="list-group list-group-flush border-top border-bottom">
+            <!-- 遍历从后端传来的 'users' (对话伙伴) 列表 -->
+            {% for user in users %}
+                <!-- 
+                【核心布局修改】
+                - d-flex: 启用 Flexbox 布局。
+                - justify-content-between: 核心！让内部元素两端对齐。
+                - align-items-center: 让内部元素垂直居中。
+                -->
+                    <div class="d-flex align-items-center">
+                        <a href="{{ url_for('main.user', username=user.username) }}" class="text-decoration-none">
+                            <img src="{{ user.avatar(64) }}" 
+                                 class="rounded-circle border" 
+                                 style="width: 64px; height: 64px; object-fit: cover;"
+                                 alt="{{ user.username }}">
+                        </a>
+                        <div class="ms-3">
+                            <a href="{{ url_for('main.user', username=user.username) }}" class="text-decoration-none text-dark fw-bold fs-5">
+                                {{ user.username }}
+                            </a>
+                        </div>
+                        <!-- 【在这里添加未读提示！】 -->
+                        <!-- 1. 调用我们刚刚写的新方法，计算来自这个 'user' 的未读数 -->
+                        {% set new_messages = current_user.new_messages_from(user) %}
+                        
+                        <!-- 2. 如果数量大于 0，就显示一个红色的徽章 -->
+                        {% if new_messages > 0 %}
+                            <span class="badge rounded-pill bg-danger ms-3">
+                                {{ new_messages }}
+                            </span>
+                        {% endif %}
+                    </div>
 
-                <!-- 2. 右侧部分：新的“Chat”按钮，链接到【对话页】 -->
-                <div>
-                    <a href="{{ url_for('main.conversation', username=user.username) }}" class="btn btn-primary btn-sm">
-                        {{ _('Chat') }}
-                    </a>
-                </div>
+                    <!-- 2. 右侧部分：新的“Chat”按钮，链接到【对话页】 -->
+                    <div>
+                        <a href="{{ url_for('main.conversation', username=user.username) }}" class="btn btn-primary btn-sm">
+                            {{ _('Chat') }}
+                        </a>
+                    </div>
 
-            </div>
-        {% endfor %}
-    </div>
-    <nav aria-label="Post navigation">
-        <ul class="pagination">
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <a class="page-link" href="#">
-                    <span aria-hidden="true">&larr;</span> {{ _('Newer messages') }}
-                </a>
-            </li>
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class="page-link" href="#">
-                    {{ _('Older messages') }} <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+                </div>
+            {% endfor %}
+        </div>
+        <!-- 分页 -->
+        <nav aria-label="Messages navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                    <a class="page-link" href="{{ prev_url or '#' }}">&larr; {{ _('Newer messages') }}</a>
+                </li>
+                <li class="page-item{% if not next_url %} disabled{% endif %}">
+                    <a class="page-link" href="{{ next_url or '#' }}">{{ _('Older messages') }} &rarr;</a>
+                </li>
+            </ul>
+        </nav>
+    {% else %}
+        <!-- 【新增】空状态提示 -->
+        <p class="text-muted mt-4">{{ _('You have no private messages yet.') }}</p>
+    {% endif %}
 {% endblock %}
