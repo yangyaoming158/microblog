@@ -218,6 +218,36 @@ class SearchableMixin(object):
     # 1. --- 搜索方法 ---
     @classmethod
     def search(cls, expression, page, per_page):
+        # 1. 检查 Elasticsearch 是否可用
+        if not current_app.elasticsearch:
+            # =================================================
+            # 优雅降级：使用数据库 LIKE 查询 (MySQL/SQLite)
+            # =================================================
+            
+            # 为了搜索作者名字，我们需要 User 模型
+            # 使用函数内导入，防止循环导入错误
+            from app.models import User 
+            
+            # 构建模糊查询关键词 (前后加 %)
+            wildcard = f'%{expression}%'
+            
+            # 构建查询语句：
+            # 1. select(cls): 选择 Post
+            # 2. join(cls.author): 连接 User 表 (以便搜索 username)
+            # 3. where(or_(...)): 筛选条件，满足任意一个即可
+            query = sa.select(cls).join(cls.author).where(
+                sa.or_(
+                    cls.body.like(wildcard),       # 搜索正文
+                    cls.title.like(wildcard),      # 搜索标题 (你之前新增的字段)
+                    User.username.like(wildcard)   # 搜索作者用户名
+                )
+            ).order_by(cls.timestamp.desc())       # 按时间倒序
+            
+            # 使用 db.paginate 进行分页
+            # 注意：这里直接返回 db.paginate 对象是不行的，我们需要返回 (items, total)
+            pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
+            
+            return pagination.items, pagination.total
         """
         为模型执行一次全文搜索。
 
