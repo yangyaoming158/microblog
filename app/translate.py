@@ -82,6 +82,7 @@ def translate(text, source_language, dest_language):
         # 我们可以返回一个更具体的错误信息，或者像教程一样返回通用信息
         return _('Error: the translation service failed.')
     
-    # 如果一切正常，从 JSON 响应中提取出翻译后的文本
-    # 根据百度 API 文档，结果在 'trans_result' 列表的第一个元素的 'dst' 键中
-    return json_data['trans_result'][0]['dst']
+    # 【修复 Bug】处理多段翻译结果
+    # 遍历 trans_result 列表，提取所有的 'dst'，并用换行符拼接
+    results = [item['dst'] for item in json_data['trans_result']]
+    return '\n'.join(results)
