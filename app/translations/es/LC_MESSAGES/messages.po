@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-12-30 14:51+0800\n"
+"POT-Creation-Date: 2026-04-22 20:49+0800\n"
 "PO-Revision-Date: 2017-09-29 23:25-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app/__init__.py:28
+#: app/__init__.py:30
 msgid "Please log in to access this page."
 msgstr "Por favor ingrese para acceder a esta página."
 
@@ -120,7 +120,8 @@ msgstr ""
 msgid "Say something"
 msgstr "Dí algo"
 
-#: app/main/forms.py:59 app/main/routes.py:211 app/templates/base.html:74
+#: app/main/forms.py:59 app/main/routes.py:225 app/templates/base.html:45
+#: app/templates/search.html:6
 msgid "Search"
 msgstr "Buscar"
 
@@ -128,259 +129,488 @@ msgstr "Buscar"
 msgid "Comment"
 msgstr ""
 
-#: app/main/forms.py:95 app/templates/post_detail.html:182
+#: app/main/forms.py:95 app/templates/post_detail.html:193
 msgid "Message"
 msgstr ""
 
-#: app/main/routes.py:51
+#: app/main/routes.py:52
 msgid "Your post is now live!"
 msgstr "¡Tu artículo ha sido publicado!"
 
-#: app/main/routes.py:61 app/templates/base.html:51
+#: app/main/routes.py:68 app/templates/base.html:52
 msgid "Home"
 msgstr "Inicio"
 
-#: app/main/routes.py:78 app/templates/base.html:54
+#: app/main/routes.py:92 app/templates/base.html:55
 msgid "Explore"
 msgstr "Explorar"
 
-#: app/main/routes.py:113
+#: app/main/routes.py:127
 msgid "Your changes have been saved."
 msgstr "Tus cambios han sido salvados."
 
-#: app/main/routes.py:118 app/templates/edit_profile.html:5
+#: app/main/routes.py:132 app/templates/base.html:82
+#: app/templates/edit_profile.html:8
 msgid "Edit Profile"
 msgstr "Editar Perfil"
 
-#: app/main/routes.py:130 app/main/routes.py:151
+#: app/main/routes.py:144 app/main/routes.py:165
 #, python-format
 msgid "User %(username)s not found."
 msgstr "El usuario %(username)s no ha sido encontrado."
 
-#: app/main/routes.py:133
+#: app/main/routes.py:147
 msgid "You cannot follow yourself!"
 msgstr "¡No te puedes seguir a tí mismo!"
 
-#: app/main/routes.py:137
+#: app/main/routes.py:151
 #, python-format
 msgid "You are following %(username)s!"
 msgstr "¡Ahora estás siguiendo a %(username)s!"
 
-#: app/main/routes.py:154
+#: app/main/routes.py:168
 msgid "You cannot unfollow yourself!"
 msgstr "¡No te puedes dejar de seguir a tí mismo!"
 
-#: app/main/routes.py:158
+#: app/main/routes.py:172
 #, python-format
 msgid "You are not following %(username)s."
 msgstr "No estás siguiendo a %(username)s."
 
-#: app/main/routes.py:236
+#: app/main/routes.py:250
 #, fuzzy
 msgid "Your post has been deleted!"
 msgstr "Tu contraseña ha sido cambiada."
 
-#: app/main/routes.py:263
+#: app/main/routes.py:277
 #, fuzzy
 msgid "Your comment has been published."
 msgstr "Tu contraseña ha sido cambiada."
 
-#: app/main/routes.py:368
+#: app/main/routes.py:385
 #, fuzzy
 msgid "Your message has been sent."
 msgstr "Tu contraseña ha sido cambiada."
 
-#: app/main/routes.py:425
+#: app/main/routes.py:442
 #, fuzzy
 msgid "Your avatar has been updated!"
 msgstr "Tu contraseña ha sido cambiada."
 
-#: app/templates/_message.html:41 app/templates/base.html:189
-#: app/templates/post_detail.html:104
+#: app/templates/_message.html:41 app/templates/base.html:155
+#: app/templates/post_detail.html:115
 msgid "Translate"
 msgstr ""
 
-#: app/templates/_post.html:23
-#, python-format
-msgid "%(username)s said %(when)s"
-msgstr "%(username)s dijo %(when)s"
-
-#: app/templates/_post.html:61
-msgid "Read more"
+#: app/templates/_post.html:11
+msgid "You"
 msgstr ""
 
-#: app/templates/_post.html:88
+#: app/templates/_post.html:21
 msgid "Delete"
 msgstr ""
 
-#: app/templates/base.html:16
+#: app/templates/_post.html:28 app/templates/post_detail.html:11
+msgid "Untitled"
+msgstr ""
+
+#: app/templates/_post.html:38
+msgid "This post contains image content."
+msgstr ""
+
+#: app/templates/_post.html:45
+#, python-format
+msgid "Posted %(when)s"
+msgstr ""
+
+#: app/templates/_post.html:48 app/templates/post_detail.html:63
+msgid "Comments"
+msgstr ""
+
+#: app/templates/_post.html:51
+msgid "Read more"
+msgstr ""
+
+#: app/templates/base.html:9
 msgid "Welcome to Microblog"
 msgstr "Bienvenido a Microblog"
 
-#: app/templates/base.html:83
+#: app/templates/base.html:31 app/templates/index.html:7
+msgid "Your social space"
+msgstr ""
+
+#: app/templates/base.html:62
 msgid "Login"
 msgstr "Ingresar"
 
-#: app/templates/base.html:88
-msgid "Profile"
-msgstr "Perfil"
-
-#: app/templates/base.html:91
-msgid "Logout"
-msgstr "Salir"
-
-#: app/templates/base.html:96 app/templates/messages.html:4
+#: app/templates/base.html:68 app/templates/messages.html:7
 msgid "Messages"
 msgstr ""
 
-#: app/templates/base.html:154
+#: app/templates/base.html:77
+msgid "Account"
+msgstr ""
+
+#: app/templates/base.html:81 app/templates/user.html:25
+msgid "Profile"
+msgstr "Perfil"
+
+#: app/templates/base.html:84
+msgid "Logout"
+msgstr "Salir"
+
+#: app/templates/base.html:128
 msgid "Translating..."
 msgstr ""
 
-#: app/templates/base.html:176
+#: app/templates/base.html:146
 msgid "Show Original"
 msgstr ""
 
-#: app/templates/base.html:187
+#: app/templates/base.html:153
 msgid "Translation failed"
 msgstr ""
 
-#: app/templates/base.html:195
+#: app/templates/base.html:160
 #, fuzzy
 msgid "Retry"
 msgstr "Registrarse"
 
-#: app/templates/conversation.html:4
+#: app/templates/conversation.html:6
+msgid "Private conversation"
+msgstr ""
+
+#: app/templates/conversation.html:7
 #, fuzzy, python-format
 msgid "Messages with %(username)s"
 msgstr "¡Hola, %(username)s!"
 
-#: app/templates/conversation.html:26 app/templates/messages.html:43
+#: app/templates/conversation.html:15
+#, fuzzy
+msgid "No messages yet"
+msgstr "Artículos previos"
+
+#: app/templates/conversation.html:16
+msgid "Start the conversation by sending the first message."
+msgstr ""
+
+#: app/templates/conversation.html:34 app/templates/messages.html:46
 #, fuzzy
 msgid "Newer messages"
 msgstr "Artículos siguientes"
 
-#: app/templates/conversation.html:31 app/templates/messages.html:48
+#: app/templates/conversation.html:39 app/templates/messages.html:49
 #, fuzzy
 msgid "Older messages"
 msgstr "Artículos previos"
 
-#: app/templates/index.html:6
+#: app/templates/edit_profile.html:7
+msgid "Account settings"
+msgstr ""
+
+#: app/templates/index.html:8
 #, python-format
 msgid "Hi, %(username)s!"
 msgstr "¡Hola, %(username)s!"
 
+#: app/templates/index.html:9
+msgid ""
+"Record ideas, publish updates, and stay connected with people who matter "
+"to you."
+msgstr ""
+
 #: app/templates/index.html:12
 #, fuzzy
-msgid "New Post"
+msgid "Create a post"
 msgstr "Artículos siguientes"
 
-#: app/templates/index.html:21
+#: app/templates/index.html:14
+#, fuzzy
+msgid "Go explore"
+msgstr "Explorar"
+
+#: app/templates/index.html:15
+#, fuzzy
+msgid "View profile"
+msgstr "Editar Perfil"
+
+#: app/templates/index.html:19
+msgid "Today's dashboard"
+msgstr ""
+
+#: app/templates/index.html:23 app/templates/index.html:64
+#, fuzzy
+msgid "Posts"
+msgstr "Artículos previos"
+
+#: app/templates/index.html:27 app/templates/index.html:56
+#, fuzzy
+msgid "Following"
+msgstr "Seguir"
+
+#: app/templates/index.html:31 app/templates/index.html:60
+#, fuzzy
+msgid "Followers"
+msgstr "Seguir"
+
+#: app/templates/index.html:35
+#, fuzzy
+msgid "Unread messages"
+msgstr "Artículos siguientes"
+
+#: app/templates/index.html:48
+#, fuzzy
+msgid "Your profile"
+msgstr "Editar tu perfil"
+
+#: app/templates/index.html:52
+msgid "Tell people a little bit about yourself."
+msgstr ""
+
+#: app/templates/index.html:68
+#, fuzzy
+msgid "Edit profile"
+msgstr "Editar Perfil"
+
+#: app/templates/index.html:69
+#, fuzzy
+msgid "My profile"
+msgstr "Perfil"
+
+#: app/templates/index.html:70 app/templates/messages.html:6
+msgid "Message center"
+msgstr ""
+
+#: app/templates/index.html:80
+#, fuzzy
+msgid "Share something new"
+msgstr "Dí algo"
+
+#: app/templates/index.html:81
+msgid "Write a title, share your thoughts, and add images with Markdown."
+msgstr ""
+
+#: app/templates/index.html:90
 msgid "Give your post a title..."
 msgstr ""
 
-#: app/templates/index.html:31
+#: app/templates/index.html:98
 msgid "What's on your mind?"
 msgstr ""
 
-#: app/templates/index.html:57
+#: app/templates/index.html:105
+msgid "Markdown supported. You can upload images from the editor toolbar."
+msgstr ""
+
+#: app/templates/index.html:115
+msgid "Community feed"
+msgstr ""
+
+#: app/templates/index.html:116
+msgid "Latest updates"
+msgstr ""
+
+#: app/templates/index.html:118
+msgid "items on this page"
+msgstr ""
+
+#: app/templates/index.html:126
+msgid "Nothing here yet"
+msgstr ""
+
+#: app/templates/index.html:127
+msgid "Once people you follow start posting, their updates will appear here."
+msgstr ""
+
+#: app/templates/index.html:133
 #, fuzzy
-msgid "Newer post"
+msgid "Newer content"
 msgstr "Artículos siguientes"
 
-#: app/templates/index.html:62
+#: app/templates/index.html:134
 #, fuzzy
-msgid "Older post"
+msgid "Older content"
 msgstr "Artículos previos"
 
-#: app/templates/messages.html:32
+#: app/templates/index.html:141
+msgid "Posting tips"
+msgstr ""
+
+#: app/templates/index.html:143
+msgid "Use Markdown to format longer thoughts."
+msgstr ""
+
+#: app/templates/index.html:144
+msgid "Keep titles short and clear for better readability."
+msgstr ""
+
+#: app/templates/index.html:145
+msgid "Add images when they make your post easier to understand."
+msgstr ""
+
+#: app/templates/index.html:150
+msgid "Quick actions"
+msgstr ""
+
+#: app/templates/index.html:152
+#, fuzzy
+msgid "Discover posts"
+msgstr "Artículos previos"
+
+#: app/templates/index.html:153
+#, fuzzy
+msgid "Open messages"
+msgstr "Artículos previos"
+
+#: app/templates/index.html:154
+#, fuzzy
+msgid "Update profile"
+msgstr "Editar Perfil"
+
+#: app/templates/index.html:159
+msgid "Coming next"
+msgstr ""
+
+#: app/templates/index.html:162
+msgid "Weekly recap"
+msgstr ""
+
+#: app/templates/index.html:163
+msgid "A space reserved for future trending topics and recommendations."
+msgstr ""
+
+#: app/templates/index.html:166
+msgid "Creator spotlight"
+msgstr ""
+
+#: app/templates/index.html:167
+msgid "You can plug recommendation data into this panel later."
+msgstr ""
+
+#: app/templates/messages.html:35
 msgid "Chat"
 msgstr ""
 
-#: app/templates/post_detail.html:11
-msgid "Untitled"
+#: app/templates/messages.html:55
+msgid "No conversations yet"
+msgstr ""
+
+#: app/templates/messages.html:56
+msgid "You have no private messages yet."
 msgstr ""
 
 #: app/templates/post_detail.html:16
 msgid "Posted by"
 msgstr ""
 
-#: app/templates/post_detail.html:45
+#: app/templates/post_detail.html:56
 #, python-format
 msgid "Translate to %(language)s"
 msgstr ""
 
-#: app/templates/post_detail.html:52
-msgid "Comments"
-msgstr ""
-
-#: app/templates/post_detail.html:60
+#: app/templates/post_detail.html:71
 msgid "Leave a comment..."
 msgstr ""
 
-#: app/templates/post_detail.html:118
+#: app/templates/post_detail.html:129
 msgid "Prev"
 msgstr ""
 
-#: app/templates/post_detail.html:121
+#: app/templates/post_detail.html:132
 msgid "Next"
 msgstr ""
 
-#: app/templates/post_detail.html:134
+#: app/templates/post_detail.html:145
 msgid "About the Author"
 msgstr ""
 
-#: app/templates/post_detail.html:173 app/templates/user.html:72
+#: app/templates/post_detail.html:184 app/templates/user.html:59
 #: app/templates/user_popup.html:15
 msgid "Follow"
 msgstr "Seguir"
 
-#: app/templates/post_detail.html:178 app/templates/user.html:81
+#: app/templates/post_detail.html:189 app/templates/user.html:64
 #: app/templates/user_popup.html:22
 msgid "Unfollow"
 msgstr "Dejar de seguir"
 
-#: app/templates/search.html:4
+#: app/templates/search.html:7
 msgid "Search Results"
 msgstr "Resultados de Búsqueda"
 
-#: app/templates/search.html:12 app/templates/user.html:119
+#: app/templates/search.html:15
+msgid "No matching posts"
+msgstr ""
+
+#: app/templates/search.html:16
+msgid "Try a different keyword or explore recent posts instead."
+msgstr ""
+
+#: app/templates/search.html:25 app/templates/user.html:100
 msgid "Newer posts"
 msgstr "Artículos siguientes"
 
-#: app/templates/search.html:17 app/templates/user.html:125
+#: app/templates/search.html:30 app/templates/user.html:105
 msgid "Older posts"
 msgstr "Artículos previos"
 
-#: app/templates/user.html:38
+#: app/templates/user.html:17
 msgid "Change Avatar"
 msgstr ""
 
-#: app/templates/user.html:46
-msgid "User"
-msgstr "Usuario"
+#: app/templates/user.html:30
+msgid "This user has not added a bio yet."
+msgstr ""
 
-#: app/templates/user.html:52 app/templates/user_popup.html:7
-msgid "Last seen on"
+#: app/templates/user.html:37
+#, fuzzy
+msgid "Last seen"
 msgstr "Última visita"
 
-#: app/templates/user.html:55 app/templates/user_popup.html:9
+#: app/templates/user.html:43
+msgid "Community"
+msgstr ""
+
+#: app/templates/user.html:45 app/templates/user_popup.html:9
 #, python-format
 msgid "%(count)d followers"
 msgstr "%(count)d seguidores"
 
-#: app/templates/user.html:55 app/templates/user_popup.html:9
+#: app/templates/user.html:46 app/templates/user_popup.html:9
 #, python-format
 msgid "%(count)d following"
 msgstr "siguiendo a %(count)d"
 
-#: app/templates/user.html:64
+#: app/templates/user.html:54
 msgid "Edit your profile"
 msgstr "Editar tu perfil"
 
-#: app/templates/user.html:89
+#: app/templates/user.html:70
 msgid "Send private message"
 msgstr ""
+
+#: app/templates/user.html:80
+#, fuzzy
+msgid "Recent posts"
+msgstr "Artículos siguientes"
+
+#: app/templates/user.html:81
+#, fuzzy, python-format
+msgid "Posts by %(username)s"
+msgstr "¡Hola, %(username)s!"
+
+#: app/templates/user.html:90
+#, fuzzy
+msgid "No posts yet"
+msgstr "Artículos previos"
+
+#: app/templates/user.html:91
+msgid "Posts published by this user will appear here."
+msgstr ""
+
+#: app/templates/user_popup.html:7
+msgid "Last seen on"
+msgstr "Última visita"
 
 #: app/templates/auth/login.html:7
 msgid "New User?"
@@ -438,4 +668,13 @@ msgstr "El administrador ha sido notificado. ¡Lamentamos la inconveniencia!"
 
 #~ msgid "Next Comments"
 #~ msgstr ""
+
+#~ msgid "%(username)s said %(when)s"
+#~ msgstr "%(username)s dijo %(when)s"
+
+#~ msgid "New Post"
+#~ msgstr "Artículos siguientes"
+
+#~ msgid "User"
+#~ msgstr "Usuario"
 

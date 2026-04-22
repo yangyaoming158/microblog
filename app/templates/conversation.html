@@ -1,36 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h3>{{ _('Messages with %(username)s', username=recipient.username) }}</h3>
+    <section class="page-panel page-panel--conversation">
+        <div class="page-header">
+            <span class="section-eyebrow">{{ _('Private conversation') }}</span>
+            <h1 class="page-title">{{ _('Messages with %(username)s', username=recipient.username) }}</h1>
+        </div>
 
-    <!-- 遍历显示聊天记录 -->
-    {% for message in messages %}
-        {% include '_message.html' %} 
-    {% endfor %}
+        <div class="surface-card conversation-thread">
+            {% for message in messages %}
+                {% include '_message.html' %}
+            {% else %}
+                <div class="page-empty-state">
+                    <h3>{{ _('No messages yet') }}</h3>
+                    <p>{{ _('Start the conversation by sending the first message.') }}</p>
+                </div>
+            {% endfor %}
+        </div>
 
-    <hr>
+        <div class="surface-card form-panel conversation-form-panel">
+            <form action="" method="post">
+                {{ form.hidden_tag() }}
+                {{ form.message.label(class_='form-label') }}
+                {{ form.message(rows=3, class_='form-control') }}
+                {{ form.submit(class_='btn btn-primary mt-3') }}
+            </form>
+        </div>
 
-    <!-- 在页面底部显示发送新消息的表单 -->
-    <form action="" method="post">
-        {{ form.hidden_tag() }}
-        {{ form.message.label }}
-        {{ form.message(rows=3, class_='form-control') }}
-        {{ form.submit(class_='btn btn-primary mt-2') }}
-    </form>
-
-    <!-- 分页导航 -->
-    <nav aria-label="Post navigation">
-        <ul class="pagination">
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <a class="page-link" href="#">
-                    <span aria-hidden="true">&larr;</span> {{ _('Newer messages') }}
-                </a>
-            </li>
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class="page-link" href="#">
-                    {{ _('Older messages') }} <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+        <nav aria-label="Post navigation" class="page-pagination">
+            <ul class="pagination">
+                <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                    <a class="page-link" href="{{ prev_url or '#' }}">
+                        <span aria-hidden="true">&larr;</span> {{ _('Newer messages') }}
+                    </a>
+                </li>
+                <li class="page-item{% if not next_url %} disabled{% endif %}">
+                    <a class="page-link" href="{{ next_url or '#' }}">
+                        {{ _('Older messages') }} <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </section>
 {% endblock %}

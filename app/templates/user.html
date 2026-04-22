@@ -1,130 +1,112 @@
-<!-- 继承自 base.html，获取网站的通用布局（如导航栏、页脚等） -->
 {% extends "base.html" %}
 
-<!-- 定义名为 'content' 的区块，这里的内容将被插入到 base.html 中对应的 block 位置 -->
 {% block content %}
-    <!-- 使用 Bootstrap 的 'table' 和 'table-hover' 类来创建一个带悬停效果的表格，用于布局 -->
-    <table class="table table-hover">
-        <!-- 表格行，valign="top" 确保单元格内容垂直顶部对齐 -->
-        <tr valign="top">
-            <!-- 左侧单元格，用于显示用户头像，固定宽度 -->
-            <td width="256px"><img src="{{ user.avatar(256) }}" 
-                                style="width: 256px; height: 256px; object-fit: cover; object-position: center;" 
-                                class="img-thumbnail"> <!-- 保留 Bootstrap 的边框样式 -->
-                <!-- 【核心修改】只在用户查看【自己】的主页时，才显示更换头像的功能 -->
-            {% if user == current_user %}
-                <!-- 
-                我们把整个功能都包裹在一个 form 表单里。
-                这个表单会 POST 到我们新创建的 change_avatar 路由。
-                -->
-                <form action="{{ url_for('main.change_avatar') }}" method="post" enctype="multipart/form-data" id="avatar-form">
-                    {{ avatar_form.hidden_tag() }} <!-- 'form' 变量需要从视图函数传递过来 -->
+    <section class="page-panel profile-page">
+        <section class="surface-card profile-hero">
+            <div class="profile-hero__media">
+                <img src="{{ user.avatar(256) }}"
+                     alt="{{ user.username }}"
+                     class="profile-hero__avatar">
 
-                    <!-- 1. 【隐藏】的文件输入框 -->
-                    <!--    - 我们用 CSS style="display: none;" 把它藏起来。
-                        - 我们给它一个 ID，比如 'avatar-upload'，以便 JS 能找到它。
-                    -->
-                    <!--这段 Jinja2 代码，在经过服务器端渲染之后，输出到最终 HTML 页面里的内容，就是：
-                        <input id="avatar-upload" name="avatar" type="file" style="display: none;">
-                    -->
+                {% if user == current_user %}
+                <form action="{{ url_for('main.change_avatar') }}" method="post" enctype="multipart/form-data" id="avatar-form" class="profile-hero__avatar-form">
+                    {{ avatar_form.hidden_tag() }}
                     {{ avatar_form.avatar(id='avatar-upload', style='display: none;') }}
-
-                    <!-- 2. 【可见】的、漂亮的“更换头像”按钮 -->
-                    <!--    - 这是一个普通的 button，不是 submit 类型。
-                        - onclick 事件是关键！
-                    -->
-                    <button type="button" class="btn btn-primary mt-2"
+                    <button type="button" class="btn btn-primary profile-hero__avatar-btn"
                             onclick="document.getElementById('avatar-upload').click();">
                         {{ _('Change Avatar') }}
                     </button>
                 </form>
-            {% endif %}
-            </td>
-            <!-- 右侧单元格，用于显示用户信息 -->
-            <td>
-                <!-- 显示用户名 -->
-                <h1>{{ _('User') }}: {{ user.username }}</h1>
-                <!-- 如果用户填写了“关于我”，则显示该段落 -->
-                {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
-                <!-- 如果用户的“上次在线”时间存在 -->
-                {% if user.last_seen %}
-                <!-- 使用 Flask-Moment 将 UTC 时间转换为用户友好的、本地化的格式 (例如: July 20, 2025 10:30 PM) -->
-                <p>{{ _('Last seen on') }}: {{ moment(user.last_seen).format('LLL') }}</p>
                 {% endif %}
-                <!-- 调用 User 模型的自定义方法，显示粉丝数和关注数 -->
-                <p>{{ _('%(count)d followers', count=user.followers_count()) }}, {{ _('%(count)d following', count=user.following_count()) }}</p>
+            </div>
 
-                <!-- 
-                  【核心条件渲染逻辑】
-                  根据当前登录用户 (current_user) 和正在查看的用户 (user) 的关系，
-                  来决定显示哪个按钮/链接。
-                -->
-                {% if user == current_user %}
-                    <!-- 1. 如果正在查看自己的个人资料 -->
-                    <p><a href="{{ url_for('main.edit_profile') }}">{{ _('Edit your profile') }}</a></p>
-                {% elif not current_user.is_following(user) %}
-                    <!-- 2. 如果正在查看别人的资料，并且【尚未】关注此人 -->
-                    <p>
-                        <!-- 显示“关注”表单 -->
-                        <form action="{{ url_for('main.follow', username=user.username) }}" method="post">
-                            {{ form.hidden_tag() }} <!-- 包含 CSRF 令牌以保证安全 -->
-                            <!-- 渲染提交按钮，设置按钮文本为 'Follow'，并应用 Bootstrap 的按钮样式 -->
-                            {{ form.submit(value=_('Follow'), class_='btn btn-primary') }}
-                        </form>
-                    </p>
-                {% else %}
-                    <!-- 3. 如果正在查看别人的资料，并且【已经】关注了此人 -->
-                    <p>
-                        <!-- 显示“取消关注”表单 -->
-                        <form action="{{ url_for('main.unfollow', username=user.username) }}" method="post">
-                            {{ form.hidden_tag() }}
-                            {{ form.submit(value=_('Unfollow'), class_='btn btn-primary') }}
-                        </form>
-                    </p>
-                {% endif %}
+            <div class="profile-hero__content">
+                <div class="profile-hero__header">
+                    <span class="section-eyebrow">{{ _('Profile') }}</span>
+                    <h1 class="profile-hero__name">{{ user.username }}</h1>
+                    {% if user.about_me %}
+                    <p class="profile-hero__bio">{{ user.about_me }}</p>
+                    {% else %}
+                    <p class="profile-hero__bio profile-hero__bio--muted">{{ _('This user has not added a bio yet.') }}</p>
+                    {% endif %}
+                </div>
 
-                {% if user != current_user %}
-                <p>
-                    <a href="{{ url_for('main.conversation', username=user.username) }}">
+                <div class="profile-hero__meta">
+                    {% if user.last_seen %}
+                    <div class="profile-hero__meta-item">
+                        <span class="profile-hero__meta-label">{{ _('Last seen') }}</span>
+                        <span class="profile-hero__meta-value">{{ moment(user.last_seen).format('LLL') }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="profile-hero__meta-item">
+                        <span class="profile-hero__meta-label">{{ _('Community') }}</span>
+                        <span class="profile-hero__meta-value">
+                            {{ _('%(count)d followers', count=user.followers_count()) }} ·
+                            {{ _('%(count)d following', count=user.following_count()) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="profile-hero__actions">
+                    {% if user == current_user %}
+                    <a href="{{ url_for('main.edit_profile') }}" class="profile-action-link">
+                        {{ _('Edit your profile') }}
+                    </a>
+                    {% elif not current_user.is_following(user) %}
+                    <form action="{{ url_for('main.follow', username=user.username) }}" method="post" class="profile-action-form">
+                        {{ form.hidden_tag() }}
+                        {{ form.submit(value=_('Follow'), class_='btn btn-primary profile-action-btn') }}
+                    </form>
+                    {% else %}
+                    <form action="{{ url_for('main.unfollow', username=user.username) }}" method="post" class="profile-action-form">
+                        {{ form.hidden_tag() }}
+                        {{ form.submit(value=_('Unfollow'), class_='btn btn-outline-secondary profile-action-btn profile-action-btn--secondary') }}
+                    </form>
+                    {% endif %}
+
+                    {% if user != current_user %}
+                    <a href="{{ url_for('main.conversation', username=user.username) }}" class="profile-action-link profile-action-link--secondary">
                         {{ _('Send private message') }}
                     </a>
-                </p>
-                {% endif %}
-            </td>
-        </tr>
-    </table>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
 
-    <!-- 遍历从后端视图函数传递过来的 'posts' 列表 -->
-    {% for post in posts %}
-        <!-- 
-          使用 'include' 语句，将显示单个帖子的逻辑复用到一个子模板中。
-          这使得代码更整洁，因为帖子在多个页面（主页、发现页、个人资料页）的显示方式是相同的。
-          每次循环，都会把当前的 'post' 对象传递给 '_post.html' 子模板。
-        -->
-        {% include '_post.html' %}
-    {% endfor %}
+        <section class="feed-section">
+            <div class="section-heading">
+                <div>
+                    <span class="section-eyebrow">{{ _('Recent posts') }}</span>
+                    <h2>{{ _('Posts by %(username)s', username=user.username) }}</h2>
+                </div>
+            </div>
 
-    <!-- 分页导航部分 -->
-    <nav aria-label="Post navigation">
-        <!-- 使用 Bootstrap 的 'pagination' 类来创建分页样式 -->
-        <ul class="pagination">
-            <!-- “上一页” (较新的帖子) 按钮 -->
-            <!-- 
-              如果 prev_url 不存在 (即，当前是第一页)，则给 li 标签添加 'disabled' 类，
-              Bootstrap 会让这个按钮变灰且不可点击。
-            -->
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <!-- 链接指向由后端计算好的 prev_url -->
-                <a class="page-link" href="{{ prev_url or '#' }}"> <!-- or '#' 避免 href 为空 -->
-                    <span aria-hidden="true">←</span> {{ _('Newer posts') }}
-                </a>
-            </li>
-            <!-- “下一页” (较旧的帖子) 按钮 -->
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class="page-link" href="{{ next_url or '#' }}">
-                    {{ _('Older posts') }} <span aria-hidden="true">→</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+            <div class="feed-list">
+                {% for post in posts %}
+                    {% include '_post.html' %}
+                {% else %}
+                    <div class="surface-card empty-state-card page-empty-state">
+                        <h3>{{ _('No posts yet') }}</h3>
+                        <p>{{ _('Posts published by this user will appear here.') }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <nav aria-label="Post navigation" class="page-pagination">
+                <ul class="pagination">
+                    <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                        <a class="page-link" href="{{ prev_url or '#' }}">
+                            <span aria-hidden="true">&larr;</span> {{ _('Newer posts') }}
+                        </a>
+                    </li>
+                    <li class="page-item{% if not next_url %} disabled{% endif %}">
+                        <a class="page-link" href="{{ next_url or '#' }}">
+                            {{ _('Older posts') }} <span aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </section>
+    </section>
 {% endblock %}

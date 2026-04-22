@@ -1,94 +1,56 @@
-<table class="table table-hover">
-        <tr>
-            
-            <td width="70px">
-                <a href="{{ url_for('main.user', username=post.author.username) }}"> <!-- 使得点击头像也可以进入用户的主页 -->
-                    <img src="{{ post.author.avatar(70) }}" 
-                        style="width: 70px; height: 70px; object-fit: cover; object-position: center;">
-                </a>
-            </td>
-            <td>
-                <!--这个技巧的核心是【分层处理】。它使用 set 指令，
-                先在模板层面将所有复杂的、包含 HTML 和 url_for 调用的动态部分【预渲染】成一个纯粹的 HTML 字符串变量。
-                然后，再将这个干净的 HTML 字符串变量，作为一个普通的参数，传递给一个只包含纯文本和占位符的翻译函数。
-                这完美地实现了“在翻译文本中安全地嵌入富文本链接”的目标，同时保持了待翻译文本的纯净和翻译流程的健壮性。
-                -->
-                {% set user_link %}
-                    <a class="user_popup"
-                    href="{{ url_for('main.user', username=post.author.username) }}">
-                        {{ post.author.username }}
-                    </a>
-                {% endset %}
-                <!-- 使用 Flask-Moment 将 UTC 时间转换为本地化时间对应的距离当前时间长度 (例如: July 20, 2025 10:30 PM) -->
-                {{ _('%(username)s said %(when)s',
-                    username=user_link, when=moment(post.timestamp).fromNow()) }}
-                <!-- <br>
-                <span id="post{{ post.id }}">{{ post.body }}</span> -->
+<article class="post-card surface-card">
+  <header class="post-card__header">
+    <div class="post-card__author-group">
+      <a href="{{ url_for('main.user', username=post.author.username) }}" class="post-card__avatar-link">
+        <img src="{{ post.author.avatar(72) }}" alt="{{ post.author.username }}" class="post-card__avatar">
+      </a>
+      <div class="post-card__author-meta">
+        <div class="post-card__author-line">
+          <a class="user_popup post-card__author-name" href="{{ url_for('main.user', username=post.author.username) }}">{{ post.author.username }}</a>
+          {% if post.author == current_user %}
+          <span class="post-card__tag">{{ _('You') }}</span>
+          {% endif %}
+        </div>
+        <div class="post-card__time">{{ moment(post.timestamp).fromNow() }}</div>
+      </div>
+    </div>
 
-                                <!-- 
-                  【新增区域开始】
-                  这里是标题和带淡出效果的摘要 
-                -->
-                
-                <!-- 2. 帖子标题 -->
-                <!--    使用 h5 标签让标题更醒目，点击标题进入详情页 -->
-                <h5 class="mt-2">
-                    <a href="{{ url_for('main.post', post_id=post.id) }}" class="text-decoration-none text-dark">
-                        {{ post.title or "Untitled" }}
-                    </a>
-                </h5>
+    {% if post.author == current_user and empty_form is defined and empty_form %}
+    <form action="{{ url_for('main.delete_post', post_id=post.id) }}" method="post" class="post-card__delete-form">
+      {{ empty_form.hidden_tag() }}
+      {{ empty_form.submit(value=_('Delete'), class_='btn btn-sm btn-outline-danger post-card__delete-btn') }}
+    </form>
+    {% endif %}
+  </header>
 
-                <div class="post-excerpt mb-2 text-secondary">
-                    <span id="post{{ post.id }}">
-                        <!-- 
-                        1. truncate(100): 先截取 Markdown 源码的前 100 个字。
-                        2. markdown: 把这 100 个字的 Markdown 转成 HTML。
-                        3. safe: 告诉 Jinja2 这是安全的 HTML。
-                        -->
-                        {{ post.body | truncate(length=100, killwords=False, end='...') | markdown | safe }}
-                    </span>
-                </div>
+  <div class="post-card__body">
+    <h3 class="post-card__title">
+      <a href="{{ url_for('main.post', post_id=post.id) }}">{{ post.title or _('Untitled') }}</a>
+    </h3>
 
-                <!-- 
-                【关键修改】
-                "Read more" 按钮只在列表页显示。
-                在详情页，我们不需要这个按钮。
-                -->
-                {% if not is_detail_view %}
-                    {% if show_comment_link is not defined or show_comment_link %}
-                    <p>
-                        <a href="{{ url_for('main.post', post_id=post.id) }}" class="btn btn-outline-primary btn-sm">
-                            {{ _('Read more') }} &rarr;
-                        </a>
-                    </p>
-                    {% endif %}
-                {% endif %}
-                <!-- 【新增区域结束】 -->
-                <!-- 【在这里添加新的代码块】 -->
-                <!-- 
-                条件判断：只有当帖子的作者 (post.author)
-                是当前登录的用户 (current_user) 时，才显示“删除”按钮。
-                还要检查 empty_form 这个变量【是否存在】于当前的模板上下文中
-                因为我只想要在个人资料页面中显示删除选项
-                -->
-                {% if post.author == current_user and empty_form %}
-                <div>
-                    <!-- 
-                    使用一个【空表单】来包裹删除按钮，以实现安全的 POST 请求。
-                    这和我们实现“关注/取消关注”功能时用的技巧完全一样。
-                    -->
-                    <form action="{{ url_for('main.delete_post', post_id=post.id) }}" method="post">
-                        <!-- 
-                        【关键】我们需要一个 CSRF 令牌。
-                        但是，我们不能直接用 g.search_form，因为它可能不存在或不适用。
-                        一个简单的解决方案是，在处理帖子列表的视图函数 (index, explore, user) 中，
-                        也都创建一个 EmptyForm 的实例并传递给模板。
-                        -->
-                        {{ empty_form.hidden_tag() }}
-                        {{ empty_form.submit(value=_('Delete'), class_='btn btn-danger btn-sm') }}
-                    </form>
-                </div>
-                {% endif %}
-            </td>
-        </tr>
-    </table>
+    <div class="post-card__excerpt post-excerpt" id="post{{ post.id }}">
+      {{ post.body | truncate(length=180, killwords=False, end='...') | markdown | safe }}
+    </div>
+
+    {% if '![' in post.body %}
+    <div class="post-card__media-hint">
+      <span class="post-card__media-icon">🖼</span>
+      <span>{{ _('This post contains image content.') }}</span>
+    </div>
+    {% endif %}
+  </div>
+
+  <footer class="post-card__footer">
+    <div class="post-meta">
+      <span>{{ _('Posted %(when)s', when=moment(post.timestamp).fromNow()) }}</span>
+    </div>
+    <div class="post-card__actions">
+      <span class="post-card__ghost-action">{{ _('Comments') }}</span>
+    {% if not is_detail_view %}
+      {% if show_comment_link is not defined or show_comment_link %}
+      <a href="{{ url_for('main.post', post_id=post.id) }}" class="post-card__read-more">{{ _('Read more') }} →</a>
+      {% endif %}
+    {% endif %}
+    </div>
+  </footer>
+</article>

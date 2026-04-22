@@ -1,83 +1,206 @@
 {% extends "base.html" %}
-<!-- 如果你不再使用 wtf.quick_form，这行 import 其实可以删掉了 -->
-{# {% import "bootstrap_wtf.html" as wtf %} #}
 
 {% block content %}
-    <h1>{{ _('Hi, %(username)s!', username=current_user.username) }}</h1>
-    
-    <!-- 【新增】手动渲染表单 -->
-    {% if form %}
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">{{ _('New Post') }}</h5>
-            <form action="" method="post">
-                {{ form.hidden_tag() }}
-                
-                <!-- 1. 标题输入框 -->
-                <div class="mb-3">
-                    {{ form.title.label(class="form-label") }}
-                    <!-- 加上 class="form-control" 让它有 Bootstrap 样式 -->
-                    <!-- placeholder 提示用户输入标题 -->
-                    {{ form.title(class="form-control", placeholder=_("Give your post a title...")) }}
-                    <!-- 显示错误信息 -->
-                    {% for error in form.title.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
-                </div>
-            
-                <!-- 2. 内容输入框 -->
-                <div class="mb-3">
-                    {{ form.post.label(class="form-label") }}
-                    {{ form.post(rows=3, class="form-control", placeholder=_("What's on your mind?"),id="post-editor") }}<!-- 给输入框一个 ID -->
-                    {% for error in form.post.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
-                </div>
-                
-                <!-- 3. 提交按钮 -->
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    {{ form.submit(class="btn btn-primary") }}
-                </div>
-            </form>
-        </div>
+<section class="hero-section surface-card">
+  <div class="hero-content">
+    <div class="hero-copy">
+      <span class="hero-eyebrow">{{ _('Your social space') }}</span>
+      <h1>{{ _('Hi, %(username)s!', username=current_user.username) }}</h1>
+      <p>{{ _('Record ideas, publish updates, and stay connected with people who matter to you.') }}</p>
+      <div class="hero-actions">
+        {% if form %}
+        <a class="btn btn-primary hero-btn hero-btn--primary" href="#composer-card">{{ _('Create a post') }}</a>
+        {% endif %}
+        <a class="btn hero-btn hero-btn--secondary" href="{{ url_for('main.explore') }}">{{ _('Go explore') }}</a>
+        <a class="btn hero-btn hero-btn--ghost" href="{{ url_for('main.user', username=current_user.username) }}">{{ _('View profile') }}</a>
+      </div>
     </div>
+    <div class="hero-side-panel">
+      <div class="hero-status-chip">{{ _('Today\'s dashboard') }}</div>
+      <div class="hero-stats surface-card">
+        <div class="hero-stat">
+          <span class="hero-stat__value">{{ hero_stats.post_count }}</span>
+          <span class="hero-stat__label">{{ _('Posts') }}</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat__value">{{ hero_stats.following_count }}</span>
+          <span class="hero-stat__label">{{ _('Following') }}</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat__value">{{ hero_stats.followers_count }}</span>
+          <span class="hero-stat__label">{{ _('Followers') }}</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat__value">{{ hero_stats.unread_message_count }}</span>
+          <span class="hero-stat__label">{{ _('Unread messages') }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="home-layout">
+  <aside class="home-sidebar">
+    <div class="surface-card profile-summary-card">
+      <div class="profile-summary-head">
+        <img src="{{ current_user.avatar(96) }}" alt="{{ current_user.username }}" class="profile-summary-avatar">
+        <div>
+          <span class="section-eyebrow profile-summary-eyebrow">{{ _('Your profile') }}</span>
+          <h2>{{ current_user.username }}</h2>
+        </div>
+      </div>
+      <p>{{ current_user.about_me or _('Tell people a little bit about yourself.') }}</p>
+      <div class="profile-stat-grid">
+        <div>
+          <strong>{{ hero_stats.following_count }}</strong>
+          <span>{{ _('Following') }}</span>
+        </div>
+        <div>
+          <strong>{{ hero_stats.followers_count }}</strong>
+          <span>{{ _('Followers') }}</span>
+        </div>
+        <div>
+          <strong>{{ hero_stats.post_count }}</strong>
+          <span>{{ _('Posts') }}</span>
+        </div>
+      </div>
+      <div class="quick-link-list">
+        <a href="{{ url_for('main.edit_profile') }}">{{ _('Edit profile') }}</a>
+        <a href="{{ url_for('main.user', username=current_user.username) }}">{{ _('My profile') }}</a>
+        <a href="{{ url_for('main.messages') }}">{{ _('Message center') }}</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="home-main">
+    {% if form %}
+    <section class="composer-card surface-card" id="composer-card">
+      <div class="composer-header">
+        <div>
+          <h2>{{ _('Share something new') }}</h2>
+          <p>{{ _('Write a title, share your thoughts, and add images with Markdown.') }}</p>
+        </div>
+      </div>
+
+      <form action="" method="post" class="composer-form">
+        {{ form.hidden_tag() }}
+
+        <div class="composer-field">
+          {{ form.title.label(class="form-label") }}
+          {{ form.title(class="form-control composer-input", placeholder=_("Give your post a title...")) }}
+          {% for error in form.title.errors %}
+          <div class="form-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="composer-field">
+          {{ form.post.label(class="form-label") }}
+          {{ form.post(rows=6, class="form-control composer-textarea", placeholder=_("What's on your mind?"), id="post-editor") }}
+          {% for error in form.post.errors %}
+          <div class="form-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="composer-toolbar">
+          <div class="composer-toolbar__hint">{{ _('Markdown supported. You can upload images from the editor toolbar.') }}</div>
+          {{ form.submit(class="btn btn-primary composer-submit") }}
+        </div>
+      </form>
+    </section>
     {% endif %}
 
-    <!-- 帖子列表 -->
-    {% for post in posts %}
-        {% include '_post.html' %}
-    {% endfor %}
+    <section class="feed-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">{{ _('Community feed') }}</span>
+          <h2>{{ title or _('Latest updates') }}</h2>
+        </div>
+        <span class="feed-summary">{{ posts|length }} {{ _('items on this page') }}</span>
+      </div>
 
-    <!-- 分页导航 (保持不变) -->
-    <nav aria-label="Post navigation">
-       <nav aria-label="Post navigation">
-        <ul class="pagination">
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <a class="page-link" href="{{ prev_url or '#' }}">
-                    <span aria-hidden="true">&larr;</span> {{ _('Newer post') }}
-                </a>
-            </li>
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class="page-link" href="{{ next_url or '#' }}">
-                    {{ _('Older post') }} <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
-        </nav>
-    </nav>
+      <div class="feed-list">
+        {% for post in posts %}
+          {% include '_post.html' %}
+        {% else %}
+          <div class="surface-card empty-state-card">
+            <h3>{{ _('Nothing here yet') }}</h3>
+            <p>{{ _('Once people you follow start posting, their updates will appear here.') }}</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <nav class="feed-pagination surface-card" aria-label="Post navigation">
+        <a class="pagination-chip {% if not prev_url %}is-disabled{% endif %}" href="{{ prev_url or '#' }}">← {{ _('Newer content') }}</a>
+        <a class="pagination-chip {% if not next_url %}is-disabled{% endif %}" href="{{ next_url or '#' }}">{{ _('Older content') }} →</a>
+      </nav>
+    </section>
+  </main>
+
+  <aside class="home-aside">
+    <div class="surface-card info-card">
+      <h3>{{ _('Posting tips') }}</h3>
+      <ul class="info-list">
+        <li>{{ _('Use Markdown to format longer thoughts.') }}</li>
+        <li>{{ _('Keep titles short and clear for better readability.') }}</li>
+        <li>{{ _('Add images when they make your post easier to understand.') }}</li>
+      </ul>
+    </div>
+
+    <div class="surface-card info-card">
+      <h3>{{ _('Quick actions') }}</h3>
+      <div class="quick-link-list quick-link-list--dense">
+        <a href="{{ url_for('main.explore') }}">{{ _('Discover posts') }}</a>
+        <a href="{{ url_for('main.messages') }}">{{ _('Open messages') }}</a>
+        <a href="{{ url_for('main.edit_profile') }}">{{ _('Update profile') }}</a>
+      </div>
+    </div>
+
+    <div class="surface-card info-card">
+      <h3>{{ _('Coming next') }}</h3>
+      <ul class="trend-list">
+        <li>
+          <strong>#{{ _('Weekly recap') }}</strong>
+          <span>{{ _('A space reserved for future trending topics and recommendations.') }}</span>
+        </li>
+        <li>
+          <strong>#{{ _('Creator spotlight') }}</strong>
+          <span>{{ _('You can plug recommendation data into this panel later.') }}</span>
+        </li>
+      </ul>
+    </div>
+  </aside>
+</section>
 {% endblock %}
 
 {% block scripts %}
-    {{ super() }}
-    <script>
-        var simplemde = new SimpleMDE({ 
-            element: document.getElementById("post-editor"),
-            spellChecker: false, // 关掉拼写检查，对中文友好
-            autosave: {
-                enabled: true,
-                uniqueId: "MyPostAutosave", // 自动保存草稿
-            },
-            forceSync: true, // 【新增】 强制在每次更改时同步到 textarea
-        });
-    </script>
+  {{ super() }}
+  {% if form %}
+  <script>
+    const composerAnchor = document.querySelector('a[href="#composer-card"]');
+    if (composerAnchor) {
+      composerAnchor.addEventListener('click', function(event) {
+        event.preventDefault();
+        const composer = document.getElementById('composer-card');
+        if (composer) {
+          composer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
+
+    const editorElement = document.getElementById('post-editor');
+    if (editorElement) {
+      new SimpleMDE({
+        element: editorElement,
+        spellChecker: false,
+        autosave: {
+          enabled: true,
+          uniqueId: 'MyPostAutosave'
+        },
+        forceSync: true,
+        status: false,
+        minHeight: '220px'
+      });
+    }
+  </script>
+  {% endif %}
 {% endblock %}

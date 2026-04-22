@@ -33,6 +33,7 @@ def before_request():
 @login_required
 def index():
     form = PostForm()
+    empty_form = EmptyForm()
     if form.validate_on_submit():
         try:
             language = detect(form.post.data)
@@ -58,9 +59,16 @@ def index():
         if posts.has_next else None
     prev_url = url_for('main.index', page=posts.prev_num) \
         if posts.has_prev else None
+    hero_stats = {
+        'post_count': db.session.scalar(sa.select(sa.func.count()).select_from(current_user.posts.select().subquery())),
+        'following_count': current_user.following_count(),
+        'followers_count': current_user.followers_count(),
+        'unread_message_count': current_user.unread_message_count()
+    }
     return render_template('index.html', title=_('Home'), form=form,
                            posts=posts.items, next_url=next_url,
-                           prev_url=prev_url)
+                           prev_url=prev_url, empty_form=empty_form,
+                           hero_stats=hero_stats)
 
 
 @bp.route('/explore')
@@ -75,9 +83,15 @@ def explore():
         if posts.has_next else None
     prev_url = url_for('main.explore', page=posts.prev_num) \
         if posts.has_prev else None
+    hero_stats = {
+        'post_count': db.session.scalar(sa.select(sa.func.count()).select_from(current_user.posts.select().subquery())),
+        'following_count': current_user.following_count(),
+        'followers_count': current_user.followers_count(),
+        'unread_message_count': current_user.unread_message_count()
+    }
     return render_template('index.html', title=_('Explore'),
                            posts=posts.items, next_url=next_url,
-                           prev_url=prev_url)
+                           prev_url=prev_url, hero_stats=hero_stats)
 
 
 @bp.route('/user/<username>')

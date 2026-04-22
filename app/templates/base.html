@@ -1,370 +1,246 @@
 <!doctype html>
-<html lang="en">
-    <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
-    <!-- 1. 基本的元标签 (Meta Tags) -->
-    <meta charset="utf-8"> <!-- 定义字符编码为 UTF-8，确保中文等非英文字符正确显示 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 响应式设计的关键！
-                                                                    告诉浏览器页面的宽度应等于设备的宽度，
-                                                                    初始缩放比例为1。这是移动端优先的基础。-->
-    
-    <!-- 2. 动态页面标题 (Dynamic Title) -->
+<html lang="{{ g.locale|default('en') }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {% if title %}
-        <!-- 如果后端视图函数传递了 'title' 变量，就使用它 -->
-        <title>{{ title }} - Microblog</title>
+      <title>{{ title }} - Microblog</title>
     {% else %}
-        <!-- 否则，使用一个默认的标题 -->
-        <title>{{ _('Welcome to Microblog') }}</title>
+      <title>{{ _('Welcome to Microblog') }}</title>
     {% endif %}
-    
-    <!-- 3. 引入 Bootstrap CSS -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-..."
-        crossorigin="anonymous">
-        <!-- href: 指向 Bootstrap 托管在 CDN 上的 CSS 文件。这个文件包含了所有的样式规则。 -->
-        <!-- rel="stylesheet": 告诉浏览器这是一个样式表。 -->
-        <!-- integrity & crossorigin: 用于增强安全性 (子资源完整性)，确保你加载的文件没有被篡改。 -->
-    </head>
-  <body>
-    <!-- 1. 导航栏容器 -->
-    <!--    .navbar: 基础导航栏类 -->
-    <!--    .navbar-expand-lg: 核心响应式行为。意思是“在大型(lg)屏幕及以上，展开导航栏；
-                            在小于大型屏幕时（如平板和手机），折叠它。” -->
-    <!--    .bg-body-tertiary: 一个 Bootstrap 预设的、轻微的背景色。 -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <!-- 2. 内部容器 -->
-      <div class="container">
-        <!-- 3. 网站品牌/Logo -->
-        <a class="navbar-brand" href="{{ url_for('main.index') }}">Microblog</a>
-        <!-- 4. 汉堡菜单按钮 (移动端) -->
-        <!--    这个按钮在小屏幕上才会显示。点击时，它会展开/折叠下面的 #navbarSupportedContent 区域。 -->
-        <!--    data-bs-toggle, data-bs-target 等是 Bootstrap JavaScript 需要的属性。-->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <!-- 5. 可折叠的导航链接区域 -->
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <!-- a. 左侧链接 -->
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{{ url_for('main.index') }}">{{ _('Home') }}</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{{ url_for('main.explore') }}">{{ _('Explore') }}</a>
-            </li>
-          </ul>
-          <!-- 
-                  【就是加在这里！】
-                  这个位置在左侧链接和右侧链接之间，符合视觉布局的习惯。
-                  Bootstrap 的 flexbox 布局会自动处理好它们之间的间距。
-                -->
-                {% if g.search_form %}
-                <form class="d-flex" method="get"
-                        action="{{ url_for('main.search') }}">
-                    <!-- 
-                      g.search_form 是我们在 before_request 处理器中注入的表单实例。
-                      我们在这里直接渲染它的 'q' 字段 (查询输入框)。
-                      class_='form-control me-2' 是 Bootstrap 的样式。
-                      placeholder=... 使用了表单字段的 label 作为输入框的提示文字。
-                    -->
-                    {{ g.search_form.q(size=20, class_='form-control me-2',
-                        placeholder=g.search_form.q.label.text) }}
-                    <!-- 添加一个提交按钮 -->
-                    <button class="btn btn-outline-success" type="submit">{{ _('Search') }}</button>
-                </form>
-                {% endif %}
-          <!-- b. 右侧链接 -->
-          <!--    'me-auto' (margin-end: auto) 把这部分推到了最右边 -->
-          <ul class="navbar-nav mb-2 mb-lg-0">
-            {% if current_user.is_anonymous %}
-            <!-- 如果用户未登录，显示登录链接 -->
-            <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{{ url_for('auth.login') }}">{{ _('Login') }}</a>
-            </li>
-            {% else %}
-            <!-- 如果用户已登录，显示个人资料、登出以及私信链接 -->
-            <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{{ url_for('main.user', username=current_user.username) }}">{{ _('Profile') }}</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" aria-current="page"
-                                href="{{ url_for('main.messages') }}">
-                            {{ _('Messages') }}
-                            {% set unread_message_count = current_user.unread_message_count() %}
-                            <span id="message_count" class="badge text-bg-danger"
-                                style="visibility: {% if unread_message_count %}visible
-                                                   {% else %}hidden{% endif %};">
-                                {{ unread_message_count }}
-                            </span>
-              </a>
-            </li>
-            
-            {% endif %}
-          </ul>
-        </div>
-      </div>
-    </nav>
-    <!-- 1. 主内容容器 -->
-    <!--    .container: 限制内容最大宽度并居中。 -->
-    <!--    .mt-3: 在容器顶部添加一些外边距，让它和导航栏之间有空隙。 -->
-    <div class="container mt-3">
-        <!-- 2. 显示闪现消息 (Flashed Messages) -->
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for message in messages %}
-        <!-- 使用 Bootstrap 的 'alert' 和 'alert-info' 类来渲染一个漂亮的蓝色提示框。 -->
-        <div class="alert alert-info" role="alert">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-      {% endwith %}
-      <!-- 3. 【核心】内容占位符 -->
-      <!--    这是 Jinja2 的模板继承核心。所有继承自这个 base.html 的子模板
-        (如 index.html, login.html) 的内容，都将被插入到这个 block 里面。 -->
-      {% block content %}{% endblock %}
-    </div>
-    <!-- 4. 引入 Bootstrap JavaScript -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous">
-    </script>
-    <!-- 这个 JS 文件是必需的，用来驱动导航栏的折叠/展开、下拉菜单、弹窗等交互功能。-->
-     {{ moment.include_moment() }}
-      <!-- 手动从 CDN 加载中文语言包 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/zh-cn.js"></script>
-    <!-- 然后再设置时间语言 -->
-     {{ moment.lang(g.locale) }}
 
-    <script> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <style>
+      {% include 'styles.css' %}
+    </style>
+  </head>
+  <body class="app-shell">
+    {% set endpoint = request.endpoint or '' %}
+    {% set home_active = endpoint == 'main.index' %}
+    {% set explore_active = endpoint == 'main.explore' %}
+    {% set messages_active = endpoint in ['main.messages', 'main.conversation'] %}
+    {% set account_active = endpoint in ['main.user', 'main.edit_profile'] %}
+    <header class="site-header">
+      <nav class="navbar navbar-expand-lg site-navbar">
+        <div class="page-shell site-navbar__inner">
+          <a class="navbar-brand brand-group" href="{{ url_for('main.index') }}">
+            <span class="brand-mark">M</span>
+            <span class="brand-copy">
+              <span class="brand-name">Microblog</span>
+              <span class="brand-tagline d-none d-xl-inline">{{ _('Your social space') }}</span>
+            </span>
+          </a>
+
+          <button class="navbar-toggler site-navbar__toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNavbar" aria-controls="siteNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="siteNavbar">
+            {% if g.search_form %}
+            <div class="site-navbar__search">
+              <form class="global-search" method="get" action="{{ url_for('main.search') }}">
+                <span class="global-search__icon" aria-hidden="true">⌕</span>
+                {{ g.search_form.q(size=20, class_='form-control global-search__input', placeholder=g.search_form.q.label.text, aria_label=g.search_form.q.label.text) }}
+                <button class="btn global-search__submit" type="submit">{{ _('Search') }}</button>
+              </form>
+            </div>
+            {% endif %}
+
+            <ul class="navbar-nav site-nav-links mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link {% if home_active %}active{% endif %}" href="{{ url_for('main.index') }}">{{ _('Home') }}</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if explore_active %}active{% endif %}" href="{{ url_for('main.explore') }}">{{ _('Explore') }}</a>
+              </li>
+            </ul>
+
+            <ul class="navbar-nav site-nav-actions mb-2 mb-lg-0">
+              {% if current_user.is_anonymous %}
+              <li class="nav-item">
+                <a class="nav-link nav-action-link" href="{{ url_for('auth.login') }}">{{ _('Login') }}</a>
+              </li>
+              {% else %}
+              {% set unread_message_count = current_user.unread_message_count() %}
+              <li class="nav-item">
+                <a class="nav-link nav-action-link {% if messages_active %}active{% endif %}" href="{{ url_for('main.messages') }}">
+                  <span>{{ _('Messages') }}</span>
+                  <span id="message_count" class="message-badge {% if not unread_message_count %}is-empty{% endif %}">{{ unread_message_count }}</span>
+                </a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle profile-menu-toggle {% if account_active %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <img src="{{ current_user.avatar(40) }}" alt="{{ current_user.username }}" class="nav-avatar">
+                  <span class="profile-menu-copy">
+                    <strong>{{ current_user.username }}</strong>
+                    <small>{{ _('Account') }}</small>
+                  </span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end profile-dropdown-menu">
+                  <li><a class="dropdown-item" href="{{ url_for('main.user', username=current_user.username) }}">{{ _('Profile') }}</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">{{ _('Edit Profile') }}</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a></li>
+                </ul>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page-shell page-content">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <section class="flash-stack" aria-label="Notifications">
+          {% for message in messages %}
+          <div class="flash-card" role="alert">{{ message }}</div>
+          {% endfor %}
+        </section>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    {{ moment.include_moment() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/zh-cn.js"></script>
+    {{ moment.lang(g.locale) }}
+
+    <script>
+      function updateHeaderOffset() {
+        const header = document.querySelector('.site-header');
+        if (!header) {
+          return;
+        }
+        const headerHeight = Math.ceil(header.getBoundingClientRect().height);
+        document.documentElement.style.setProperty('--header-offset', `${headerHeight}px`);
+      }
 
       async function translate_replace(elemId, sourceLang, destLang, linkElem) {
         const textElem = document.getElementById(elemId);
-        
-        // 1. 获取原文
         const originalText = textElem.textContent;
-        
-        // 2. 显示加载状态
-        //    这里我们不替换图片，而是把文本变灰，或者显示一个 loading spinner
-        const originalHtml = textElem.innerHTML; // 保存原始 HTML 以便恢复（可选）
+        const originalHtml = textElem.innerHTML;
         textElem.style.opacity = '0.5';
         linkElem.innerText = "{{ _('Translating...') }}";
 
         try {
-            // 3. 发送翻译请求
-            const response = await fetch('/translate', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json; charset=utf-8'},
-                body: JSON.stringify({
-                    text: originalText,
-                    source_language: sourceLang,
-                    dest_language: destLang
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (data.text && !data.text.startsWith('Error:')) {
-                // 4. 【核心】用译文直接替换原文
-                textElem.innerText = data.text;
-                textElem.style.opacity = '1';
-                
-                // 5. 修改链接文字，或者隐藏链接
-                linkElem.innerText = "{{ _('Show Original') }}";
-                
-                // (进阶) 你可以把 onclick 改成“恢复原文”的逻辑
-                // 这里为了简单，先不写复杂的 toggle 逻辑
-                linkElem.onclick = function() {
-                    textElem.innerHTML = originalHtml; // 恢复
-                    textElem.style.opacity = '1';
-                    linkElem.remove(); // 恢复后移除链接，或者重置为翻译按钮
-                };
-                
-            } else {
-                alert("{{ _('Translation failed') }}");
-                textElem.style.opacity = '1';
-                linkElem.innerText = "{{ _('Translate') }}";
-            }
-            
-        } catch (e) {
-            console.error(e);
-            textElem.style.opacity = '1';
-            linkElem.innerText = "{{ _('Retry') }}";
-        }
-    }
-
-    // 1. 定义一个用于初始化 popover 的函数
-      //    我们把所有初始化的逻辑都封装在这个函数里，保持代码整洁。
-    function initialize_popovers() {
-        // 1. 查找所有目标元素
-        //    - document.getElementsByClassName('user_popup'): 
-        //      在整个页面中，找到所有 class 包含了 'user_popup' 的 HTML 元素。
-        //      这会返回一个 HTMLCollection，它是一个类数组对象。
-        const popups = document.getElementsByClassName('user_popup');
-        
-        // 2. 遍历所有找到的链接
-        for (let i = 0; i < popups.length; i++) {
-            // 3. 为【每一个】链接创建一个新的 Popover 实例
-            const popover = new bootstrap.Popover(popups[i], {
-            // --- Popover 的配置选项 ---
-
-            // a. 初始内容
-            content: 'Loading...', // 弹窗刚出现时显示的占位文本
-            
-            // b. 触发方式
-            //    - 'hover': 鼠标悬停时触发
-            //    - 'focus': 元素获得焦点时触发 (例如通过 Tab 键)
-            trigger: 'hover focus',
-            
-            // c. 弹窗位置
-            placement: 'right', // 出现在触发元素的右侧
-            
-            // d. 内容类型
-            html: true, // 【关键】告诉 Bootstrap，'content' 属性里的是 HTML，而不是纯文本
-            
-            // e. 安全设置
-            sanitize: false, // 【关键】禁用 Bootstrap 内置的 HTML 清理功能。
-                            // 因为我们的 HTML 是由后端 Jinja2 安全生成的，所以这样做是安全的。
-            
-            // f. 延迟
-            //    - show: 500: 鼠标悬停【半秒 (500毫秒)】后才显示弹窗，防止用户只是不小心划过。
-            //    - hide: 0: 鼠标移开时立即隐藏，没有延迟。
-            delay: {show: 500, hide: 0},
-            
-            // g. 【核心技巧 #1】容器
-            //    - container: popups[i]: 
-            //      告诉 Bootstrap，不要把弹窗的 HTML 代码插入到 <body> 的末尾（默认行为），
-            //      而是把它插入到【触发链接 popups[i] 的内部】。
-            //      这使得“链接”和“弹窗”在 DOM 结构上变成了一个整体。
-            //      这是实现“鼠标可以从链接移入弹窗而弹窗不消失”的第一步。
-            container: popups[i],
-            
-            // h. 【核心技巧 #2】自定义 Class
-            //    - customClass: 'd-inline':
-            //      给弹窗最外层的 <div> 元素添加一个 Bootstrap 的 'd-inline' class。
-            //      这会改变它的 display 属性，防止它像一个块级元素那样强行换行，
-            //      从而破坏页面原有的布局。
-            customClass: 'd-inline',
+          const response = await fetch('/translate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json; charset=utf-8'},
+            body: JSON.stringify({
+              text: originalText,
+              source_language: sourceLang,
+              dest_language: destLang
+            })
           });
 
-           // 2. 【核心】为“即将显示 (show)”事件添加一个监听器
-          //    - 'show.bs.popover': 这是 Bootstrap Popover 特有的一个事件。
-          //      它在 popover 被触发、正【准备】显示【之前】被触发。
-          //    - async (ev) => { ... }: 我们定义了一个异步的箭头函数来处理这个事件。
-          //      - 'ev' 是事件对象，ev.target 指向触发这个事件的元素（也就是那个 <a> 链接）。
+          const data = await response.json();
+
+          if (data.text && !data.text.startsWith('Error:')) {
+            textElem.innerText = data.text;
+            textElem.style.opacity = '1';
+            linkElem.innerText = "{{ _('Show Original') }}";
+            linkElem.onclick = function() {
+              textElem.innerHTML = originalHtml;
+              textElem.style.opacity = '1';
+              linkElem.remove();
+            };
+          } else {
+            alert("{{ _('Translation failed') }}");
+            textElem.style.opacity = '1';
+            linkElem.innerText = "{{ _('Translate') }}";
+          }
+        } catch (e) {
+          console.error(e);
+          textElem.style.opacity = '1';
+          linkElem.innerText = "{{ _('Retry') }}";
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', updateHeaderOffset);
+      window.addEventListener('load', updateHeaderOffset);
+      window.addEventListener('resize', updateHeaderOffset);
+
+      function initialize_popovers() {
+        const popups = document.getElementsByClassName('user_popup');
+        for (let i = 0; i < popups.length; i++) {
+          new bootstrap.Popover(popups[i], {
+            content: 'Loading...',
+            trigger: 'hover focus',
+            placement: 'right',
+            html: true,
+            sanitize: false,
+            delay: {show: 500, hide: 0},
+            container: popups[i],
+            customClass: 'd-inline'
+          });
+
           popups[i].addEventListener('show.bs.popover', async (ev) => {
-            
-            // 3. 【优化】检查内容是否已经加载过
-            //    - 我们在链接元素上自定义了一个 'popupLoaded' 属性作为“缓存标记”。
-            //    - 如果这个标记为 true，说明我们已经为这个弹窗加载过内容了，
-            //      直接 return，不再发送重复的 Ajax 请求。
             if (ev.target.popupLoaded) {
               return;
             }
-            
-            // 4. 【核心】发起 Ajax 请求获取弹窗内容
-            //    - ev.target.innerText.trim(): 从触发链接 (<a>) 中获取纯文本的用户名。
-            //    - fetch(...): 向我们之前创建的 /user/<username>/popup 路由发送一个 GET 请求。
             const response = await fetch('/user/' + ev.target.innerText.trim() + '/popup');
-            //    - await response.text(): 获取服务器返回的 HTML 片段（注意这里是 .text() 而不是 .json()）。
             const data = await response.text();
-            
-            // 5. 【核心】更新 Popover 的内容
-            //    - bootstrap.Popover.getInstance(ev.target):
-            //      通过触发元素，获取到与之关联的那个 Popover 对象实例。
             const popover = bootstrap.Popover.getInstance(ev.target);
-            if (popover && data) { // 确保实例和数据都存在
-              // a. 设置“缓存标记”，表示内容已加载。
+            if (popover && data) {
               ev.target.popupLoaded = true;
-              // b. 【关键】调用 .setContent() 方法来动态更新弹窗内容。
-              //    - {'.popover-body': data}: 
-              //      这个语法告诉 Popover：“请找到这个弹窗内部的 .popover-body 元素，
-              //      然后把它的 HTML 内容替换成我从服务器获取的 'data' (HTML 片段)。”
               popover.setContent({'.popover-body': data});
-              
-              // 6. 【细节】重新渲染 Flask-Moment 时间戳
-              //    - 因为我们动态插入的 HTML 片段中包含了由 moment() 生成的特殊 <span>，
-              //      它们需要被 JavaScript 再次处理才能显示成“几秒前”这样的格式。
-              //    - flask_moment_render_all() 就是 Flask-Moment 提供的、用于手动触发
-              //      全页时间戳重新渲染的函数。
               setTimeout(function() {
-                  flask_moment_render_all();
+                flask_moment_render_all();
               }, 0);
             }
           });
-
         }
-    }
-      
-      // 2. 将这个初始化函数注册为 DOMContentLoaded 事件的处理器
-      //    - document.addEventListener: 这是标准的、向文档添加事件监听器的方法。
-      //    - 'DOMContentLoaded': 指定我们要监听的事件名称。
-      //    - initialize_popovers: 指定当事件发生时，要调用的函数。
-      //      (注意：这里只传递函数名，不要加括号，因为我们不是要立即调用它)
+      }
+
       document.addEventListener('DOMContentLoaded', initialize_popovers);
 
+      const siteNavbarCollapse = document.getElementById('siteNavbar');
+      if (siteNavbarCollapse) {
+        siteNavbarCollapse.addEventListener('shown.bs.collapse', updateHeaderOffset);
+        siteNavbarCollapse.addEventListener('hidden.bs.collapse', updateHeaderOffset);
+      }
 
       function set_message_count(n) {
-        // 1. 在整个 HTML 文档中，查找 ID 为 'message_count' 的那个元素。
-        //    这个元素通常是在 base.html 模板中，导航栏“消息”链接旁边的一个 <span> 标签。
         const count_elem = document.getElementById('message_count');
-        
-        // 2. 将找到的元素的【内部文本内容】更新为传入的新数量 'n'。
-        //    例如，如果 n 是 3，这个 <span> 的文本就会变成 "3"。
+        if (!count_elem) {
+          return;
+        }
         count_elem.innerText = n;
-        
-        // 3. 根据新数量，动态地设置元素的【可见性】。
-        //    - 使用了一个三元条件运算符 (condition ? value_if_true : value_if_false)。
-        //    - 在 JavaScript 中，数字 0 会被当作 "false"，任何非零数字都会被当作 "true"。
-        //    - 如果 n 大于 0 (n 为 "true")，就将 CSS 的 'visibility' 属性设置为 'visible'，让徽章显示出来。
-        //    - 如果 n 等于 0 (n 为 "false")，就将 'visibility' 属性设置为 'hidden'，让徽章隐藏起来（但仍然占据空间）。
-        count_elem.style.visibility = n ? 'visible' : 'hidden';
+        count_elem.classList.toggle('is-empty', !n);
       }
 
       {% if current_user.is_authenticated %}
       function initialize_notifications() {
-        // 客户端 (JavaScript) 负责记住它收到的最后一条通知的时间戳。这个时间戳就是它的“书签”。
-        // 在每一次后续的轮询请求中，客户端都会把这个“书签” (since 参数) 发送给服务器。
-        // 服务器端 (Flask) 利用这个“书签”，只从数据库中查询比这个时间戳更新的通知。
-        // 这样，服务器永远不会返回客户端已经见过的旧通知，每次返回的要么是全新的通知列表，要么是一个空列表。
         let since = 0;
-        // 每 10000 毫秒 (10秒) 执行一次
         setInterval(async function() {
-          // 向 /notifications API 发送 GET 请求，并带上 'since' 参数
           const response = await fetch('{{ url_for('main.notifications') }}?since=' + since);
-          const notifications = await response.json(); // 将 JSON 解析为 JavaScript 数组
-          // 遍历返回的新通知
+          const notifications = await response.json();
           for (let i = 0; i < notifications.length; i++) {
-            // 根据通知的 name，执行不同的前端操作
-            if (notifications[i].name == 'unread_message_count')
+            if (notifications[i].name == 'unread_message_count') {
               set_message_count(notifications[i].data);
-            // 更新 'since' 为最后一条通知的时间戳，以便下次只请求更新的
+            }
             since = notifications[i].timestamp;
           }
         }, 10000);
       }
-      // 页面加载后，开始轮询
       document.addEventListener('DOMContentLoaded', initialize_notifications);
       {% endif %}
 
-
-      // 【新增】监听我们隐藏的文件输入框的变化
       const avatarUpload = document.getElementById('avatar-upload');
       if (avatarUpload) {
-          avatarUpload.addEventListener('change', function() {
-              // 当用户选择了文件后，这个 'change' 事件就会被触发
-              if (this.files.length > 0) {
-                  // 找到并【自动提交】包裹着它的表单
-                  document.getElementById('avatar-form').submit();
-              }
-          });
+        avatarUpload.addEventListener('change', function() {
+          if (this.files.length > 0) {
+            document.getElementById('avatar-form').submit();
+          }
+        });
       }
     </script>
-    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script><!-- 4. 引入 SimpleMDE markdown文本编辑器 -->
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>
