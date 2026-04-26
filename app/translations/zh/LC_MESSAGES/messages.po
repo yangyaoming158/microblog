@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-04-22 20:49+0800\n"
+"POT-Creation-Date: 2026-04-26 20:45+0800\n"
 "PO-Revision-Date: 2024-05-20 10:00+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: app/__init__.py:30
 msgid "Please log in to access this page."
-msgstr "请登录以访问此页面。"
+msgstr "请登录后访问此页面。"
 
 #: app/translate.py:39
 msgid "Error: the translation service is not configured."
@@ -34,46 +34,67 @@ msgstr "错误：翻译服务失败"
 msgid "[Microblog] Reset Your Password"
 msgstr "[Microblog] 重置您的密码"
 
-#: app/auth/forms.py:11 app/auth/forms.py:18 app/main/forms.py:13
+#: app/auth/forms.py:16 app/main/forms.py:16
+msgid ""
+"Usernames must start with a letter and contain only letters, numbers, dots, "
+"underscores, or hyphens."
+msgstr "用户名必须以字母开头，且只能包含字母、数字、点、下划线或连字符。"
+
+#: app/auth/forms.py:26 app/auth/forms.py:33 app/main/forms.py:22
 msgid "Username"
 msgstr "用户名"
 
-#: app/auth/forms.py:12 app/auth/forms.py:20 app/auth/forms.py:45
+#: app/auth/forms.py:27 app/auth/forms.py:35 app/auth/forms.py:59
 msgid "Password"
 msgstr "密码"
 
-#: app/auth/forms.py:13
+#: app/auth/forms.py:28
 msgid "Remember Me"
 msgstr "记住我"
 
-#: app/auth/forms.py:14 app/auth/routes.py:30 app/templates/auth/login.html:5
+#: app/auth/forms.py:29 app/auth/routes.py:30 app/templates/auth/login.html:5
 msgid "Sign In"
 msgstr "登录"
 
-#: app/auth/forms.py:19 app/auth/forms.py:40
+#: app/auth/forms.py:34 app/auth/forms.py:54
 msgid "Email"
 msgstr "电子邮箱"
 
-#: app/auth/forms.py:22 app/auth/forms.py:47
+#: app/auth/forms.py:37 app/auth/forms.py:61
 msgid "Repeat Password"
 msgstr "重复密码"
 
-#: app/auth/forms.py:24 app/auth/routes.py:51
-#: app/templates/auth/register.html:5
+#: app/auth/forms.py:38 app/auth/routes.py:51 app/templates/auth/register.html:5
 msgid "Register"
 msgstr "注册"
 
-#: app/auth/forms.py:30 app/main/forms.py:27
+#: app/auth/forms.py:44 app/main/forms.py:36
 msgid "Please use a different username."
 msgstr "请输入一个不同的用户名。"
 
-#: app/auth/forms.py:36
+#: app/auth/forms.py:50
 msgid "Please use a different email address."
 msgstr "请输入一个不同的电子邮箱地址。"
 
-#: app/auth/forms.py:41 app/auth/forms.py:49
+#: app/auth/forms.py:55 app/auth/forms.py:62
 msgid "Request Password Reset"
 msgstr "请求重置密码"
+
+#: app/auth/forms.py:66
+msgid "Current Password"
+msgstr "当前密码"
+
+#: app/auth/forms.py:67
+msgid "New Password"
+msgstr "新密码"
+
+#: app/auth/forms.py:69
+msgid "Repeat New Password"
+msgstr "重复新密码"
+
+#: app/auth/forms.py:70
+msgid "Update Password"
+msgstr "更新密码"
 
 #: app/auth/routes.py:23
 msgid "Invalid username or password"
@@ -95,41 +116,59 @@ msgstr "重置密码"
 msgid "Your password has been reset."
 msgstr "您的密码已被重置。"
 
-#: app/main/forms.py:14
+#: app/auth/routes.py:94
+msgid "Current password is incorrect."
+msgstr "当前密码不正确。"
+
+#: app/auth/routes.py:98
+msgid "Your password has been updated."
+msgstr "您的密码已更新。"
+
+#: app/auth/routes.py:101 app/templates/auth/change_password.html:8
+#: app/templates/base.html:83 app/templates/base.html:104
+msgid "Change Password"
+msgstr "修改密码"
+
+#: app/main/forms.py:23
 msgid "About me"
 msgstr "关于我"
 
-#: app/main/forms.py:16 app/main/forms.py:47 app/main/forms.py:92
-#: app/main/forms.py:97
+#: app/main/forms.py:25 app/main/forms.py:54 app/main/forms.py:70
+#: app/main/forms.py:76
 msgid "Submit"
 msgstr "提交"
 
-#: app/main/forms.py:32
+#: app/main/forms.py:40
 msgid "New Avatar"
 msgstr "新头像"
 
-#: app/main/forms.py:35
+#: app/main/forms.py:41
+msgid "Images only."
+msgstr "只能上传图片。"
+
+#: app/main/forms.py:43
 msgid "Upload"
 msgstr "上传"
 
-#: app/main/forms.py:44
+#: app/main/forms.py:51
 msgid "Title"
 msgstr "标题"
 
-#: app/main/forms.py:45
+#: app/main/forms.py:52
 msgid "Say something"
 msgstr "说点什么"
 
-#: app/main/forms.py:59 app/main/routes.py:225 app/templates/base.html:45
+#: app/main/forms.py:58 app/main/routes.py:232 app/templates/base.html:45
 #: app/templates/search.html:6
 msgid "Search"
 msgstr "搜索"
 
-#: app/main/forms.py:91
+#: app/main/forms.py:69
 msgid "Comment"
 msgstr "评论"
 
-#: app/main/forms.py:95 app/templates/post_detail.html:193
+#: app/main/forms.py:74 app/templates/post_detail.html:193
+#: app/templates/user_popup.html:46
 msgid "Message"
 msgstr "私信"
 
@@ -177,23 +216,35 @@ msgstr "您不能取消关注自己！"
 msgid "You are not following %(username)s."
 msgstr "您没有关注 %(username)s。"
 
-#: app/main/routes.py:250
+#: app/main/routes.py:184 app/main/routes.py:190
+msgid "Error: invalid translation request."
+msgstr "错误：无效的翻译请求。"
+
+#: app/main/routes.py:257
 msgid "Your post has been deleted!"
 msgstr "您的文章已被删除！"
 
-#: app/main/routes.py:277
+#: app/main/routes.py:284
 msgid "Your comment has been published."
 msgstr "您的评论已发布。"
 
-#: app/main/routes.py:385
+#: app/main/routes.py:392
 msgid "Your message has been sent."
 msgstr "您的私信已发送。"
 
-#: app/main/routes.py:442
+#: app/main/routes.py:432
+msgid "Please upload a JPG or PNG image."
+msgstr "请上传 JPG 或 PNG 格式的图片。"
+
+#: app/main/routes.py:449
+msgid "Please upload a valid image file."
+msgstr "请上传有效的图片文件。"
+
+#: app/main/routes.py:468
 msgid "Your avatar has been updated!"
 msgstr "您的头像已更新！"
 
-#: app/templates/_message.html:41 app/templates/base.html:155
+#: app/templates/_message.html:41 app/templates/base.html:169
 #: app/templates/post_detail.html:115
 msgid "Translate"
 msgstr "翻译"
@@ -251,25 +302,43 @@ msgstr "账号"
 msgid "Profile"
 msgstr "个人资料"
 
-#: app/templates/base.html:84
+#: app/templates/base.html:85
 msgid "Logout"
 msgstr "登出"
 
-#: app/templates/base.html:128
+#: app/templates/base.html:100
+msgid "Strengthen your account security"
+msgstr "加强您的账户安全"
+
+#: app/templates/base.html:101
+msgid ""
+"If this account has been used before, consider updating your password to "
+"keep it protected."
+msgstr "如果此账户之前已被使用，建议更新密码以保护账户安全。"
+
+#: app/templates/base.html:105
+msgid "Dismiss"
+msgstr "关闭"
+
+#: app/templates/base.html:142
 msgid "Translating..."
 msgstr "正在翻译..."
 
-#: app/templates/base.html:146
+#: app/templates/base.html:160
 msgid "Show Original"
 msgstr "显示原文"
 
-#: app/templates/base.html:153
+#: app/templates/base.html:167
 msgid "Translation failed"
 msgstr "翻译失败"
 
-#: app/templates/base.html:160
+#: app/templates/base.html:174
 msgid "Retry"
 msgstr "重试"
+
+#: app/templates/base.html:200
+msgid "Loading..."
+msgstr "加载中..."
 
 #: app/templates/conversation.html:6
 msgid "Private conversation"
@@ -307,8 +376,8 @@ msgstr "你好, %(username)s！"
 
 #: app/templates/index.html:9
 msgid ""
-"Record ideas, publish updates, and stay connected with people who matter "
-"to you."
+"Record ideas, publish updates, and stay connected with people who matter to "
+"you."
 msgstr "记录想法，发布动态，并与你在意的人保持连接。"
 
 #: app/templates/index.html:12
@@ -501,12 +570,12 @@ msgid "About the Author"
 msgstr "关于作者"
 
 #: app/templates/post_detail.html:184 app/templates/user.html:59
-#: app/templates/user_popup.html:15
+#: app/templates/user_popup.html:38
 msgid "Follow"
 msgstr "关注"
 
 #: app/templates/post_detail.html:189 app/templates/user.html:64
-#: app/templates/user_popup.html:22
+#: app/templates/user_popup.html:43
 msgid "Unfollow"
 msgstr "取消关注"
 
@@ -546,12 +615,12 @@ msgstr "最近在线"
 msgid "Community"
 msgstr "社交数据"
 
-#: app/templates/user.html:45 app/templates/user_popup.html:9
+#: app/templates/user.html:45
 #, python-format
 msgid "%(count)d followers"
 msgstr "%(count)d 粉丝"
 
-#: app/templates/user.html:46 app/templates/user_popup.html:9
+#: app/templates/user.html:46
 #, python-format
 msgid "%(count)d following"
 msgstr "关注 %(count)d 人"
@@ -569,6 +638,7 @@ msgid "Recent posts"
 msgstr "最近发布"
 
 #: app/templates/user.html:81
+#, python-format
 msgid "Posts by %(username)s"
 msgstr "%(username)s 发布的帖子"
 
@@ -580,9 +650,35 @@ msgstr "还没有发布帖子"
 msgid "Posts published by this user will appear here."
 msgstr "这个用户发布的帖子会显示在这里。"
 
-#: app/templates/user_popup.html:7
+#: app/templates/user_popup.html:11
+msgid "No profile text yet."
+msgstr "还没有填写个人简介。"
+
+#: app/templates/user_popup.html:18
 msgid "Last seen on"
 msgstr "上次在线于"
+
+#: app/templates/user_popup.html:23
+msgid "Unknown"
+msgstr "未知"
+
+#: app/templates/user_popup.html:28
+msgid "followers"
+msgstr "关注者"
+
+#: app/templates/user_popup.html:29
+msgid "following"
+msgstr "关注中"
+
+#: app/templates/auth/change_password.html:7
+msgid "Account security"
+msgstr "账户安全"
+
+#: app/templates/auth/change_password.html:9
+msgid ""
+"Use a strong password with at least 8 characters. Updating it periodically "
+"helps protect your account."
+msgstr "使用至少8个字符的强密码。定期更新密码有助于保护您的账户安全。"
 
 #: app/templates/auth/login.html:7
 msgid "New User?"
@@ -649,4 +745,46 @@ msgstr "管理员已收到通知。对您造成的不便，我们深表歉意！
 
 #~ msgid "User"
 #~ msgstr "用户"
+
+#~ msgid "Please log in to access this page."
+#~ msgstr "请登录以访问此页面。"
+
+#~ msgid "Username"
+#~ msgstr "用户名"
+
+#~ msgid "Password"
+#~ msgstr "密码"
+
+#~ msgid "Remember Me"
+#~ msgstr "记住我"
+
+#~ msgid "Email"
+#~ msgstr "电子邮箱"
+
+#~ msgid "Repeat Password"
+#~ msgstr "重复密码"
+
+#~ msgid "Request Password Reset"
+#~ msgstr "请求重置密码"
+
+#~ msgid "About me"
+#~ msgstr "关于我"
+
+#~ msgid "Submit"
+#~ msgstr "提交"
+
+#~ msgid "New Avatar"
+#~ msgstr "新头像"
+
+#~ msgid "Upload"
+#~ msgstr "上传"
+
+#~ msgid "Title"
+#~ msgstr "标题"
+
+#~ msgid "Say something"
+#~ msgstr "说点什么"
+
+#~ msgid "Comment"
+#~ msgstr "评论"
 

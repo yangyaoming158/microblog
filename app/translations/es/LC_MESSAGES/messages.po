@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-04-22 20:49+0800\n"
+"POT-Creation-Date: 2026-04-26 20:45+0800\n"
 "PO-Revision-Date: 2017-09-29 23:25-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -24,56 +24,79 @@ msgstr "Por favor ingrese para acceder a esta página."
 
 #: app/translate.py:39
 msgid "Error: the translation service is not configured."
-msgstr ""
+msgstr "Error: el servicio de traduccion no esta configurado."
 
 #: app/translate.py:73 app/translate.py:83
 msgid "Error: the translation service failed."
-msgstr ""
+msgstr "Error: el servicio de traduccion fallo."
 
 #: app/auth/email.py:8
 msgid "[Microblog] Reset Your Password"
 msgstr "[Microblog] Nueva Contraseña"
 
-#: app/auth/forms.py:11 app/auth/forms.py:18 app/main/forms.py:13
+#: app/auth/forms.py:16 app/main/forms.py:16
+msgid ""
+"Usernames must start with a letter and contain only letters, numbers, dots, "
+"underscores, or hyphens."
+msgstr ""
+"Los nombres de usuario deben empezar con una letra y solo pueden contener "
+"letras, numeros, puntos, guiones bajos o guiones."
+
+#: app/auth/forms.py:26 app/auth/forms.py:33 app/main/forms.py:22
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: app/auth/forms.py:12 app/auth/forms.py:20 app/auth/forms.py:45
+#: app/auth/forms.py:27 app/auth/forms.py:35 app/auth/forms.py:59
 msgid "Password"
 msgstr "Contraseña"
 
-#: app/auth/forms.py:13
+#: app/auth/forms.py:28
 msgid "Remember Me"
 msgstr "Recordarme"
 
-#: app/auth/forms.py:14 app/auth/routes.py:30 app/templates/auth/login.html:5
+#: app/auth/forms.py:29 app/auth/routes.py:30 app/templates/auth/login.html:5
 msgid "Sign In"
 msgstr "Ingresar"
 
-#: app/auth/forms.py:19 app/auth/forms.py:40
+#: app/auth/forms.py:34 app/auth/forms.py:54
 msgid "Email"
 msgstr "Email"
 
-#: app/auth/forms.py:22 app/auth/forms.py:47
+#: app/auth/forms.py:37 app/auth/forms.py:61
 msgid "Repeat Password"
 msgstr "Repetir Contraseña"
 
-#: app/auth/forms.py:24 app/auth/routes.py:51
-#: app/templates/auth/register.html:5
+#: app/auth/forms.py:38 app/auth/routes.py:51 app/templates/auth/register.html:5
 msgid "Register"
 msgstr "Registrarse"
 
-#: app/auth/forms.py:30 app/main/forms.py:27
+#: app/auth/forms.py:44 app/main/forms.py:36
 msgid "Please use a different username."
 msgstr "Por favor use un nombre de usuario diferente."
 
-#: app/auth/forms.py:36
+#: app/auth/forms.py:50
 msgid "Please use a different email address."
 msgstr "Por favor use una dirección de email diferente."
 
-#: app/auth/forms.py:41 app/auth/forms.py:49
+#: app/auth/forms.py:55 app/auth/forms.py:62
 msgid "Request Password Reset"
 msgstr "Pedir una nueva contraseña"
+
+#: app/auth/forms.py:66
+msgid "Current Password"
+msgstr "Contrasena actual"
+
+#: app/auth/forms.py:67
+msgid "New Password"
+msgstr "Nueva contrasena"
+
+#: app/auth/forms.py:69
+msgid "Repeat New Password"
+msgstr "Repetir nueva contrasena"
+
+#: app/auth/forms.py:70
+msgid "Update Password"
+msgstr "Actualizar contrasena"
 
 #: app/auth/routes.py:23
 msgid "Invalid username or password"
@@ -95,43 +118,61 @@ msgstr "Nueva Contraseña"
 msgid "Your password has been reset."
 msgstr "Tu contraseña ha sido cambiada."
 
-#: app/main/forms.py:14
+#: app/auth/routes.py:94
+msgid "Current password is incorrect."
+msgstr "La contrasena actual es incorrecta."
+
+#: app/auth/routes.py:98
+msgid "Your password has been updated."
+msgstr "Tu contrasena se ha actualizado."
+
+#: app/auth/routes.py:101 app/templates/auth/change_password.html:8
+#: app/templates/base.html:83 app/templates/base.html:104
+msgid "Change Password"
+msgstr "Cambiar contrasena"
+
+#: app/main/forms.py:23
 msgid "About me"
 msgstr "Acerca de mí"
 
-#: app/main/forms.py:16 app/main/forms.py:47 app/main/forms.py:92
-#: app/main/forms.py:97
+#: app/main/forms.py:25 app/main/forms.py:54 app/main/forms.py:70
+#: app/main/forms.py:76
 msgid "Submit"
 msgstr "Enviar"
 
-#: app/main/forms.py:32
+#: app/main/forms.py:40
 msgid "New Avatar"
-msgstr ""
+msgstr "Nuevo avatar"
 
-#: app/main/forms.py:35
+#: app/main/forms.py:41
+msgid "Images only."
+msgstr "Solo imagenes."
+
+#: app/main/forms.py:43
 msgid "Upload"
-msgstr ""
+msgstr "Subir"
 
-#: app/main/forms.py:44
+#: app/main/forms.py:51
 msgid "Title"
-msgstr ""
+msgstr "Titulo"
 
-#: app/main/forms.py:45
+#: app/main/forms.py:52
 msgid "Say something"
 msgstr "Dí algo"
 
-#: app/main/forms.py:59 app/main/routes.py:225 app/templates/base.html:45
+#: app/main/forms.py:58 app/main/routes.py:232 app/templates/base.html:45
 #: app/templates/search.html:6
 msgid "Search"
 msgstr "Buscar"
 
-#: app/main/forms.py:91
+#: app/main/forms.py:69
 msgid "Comment"
-msgstr ""
+msgstr "Comentario"
 
-#: app/main/forms.py:95 app/templates/post_detail.html:193
+#: app/main/forms.py:74 app/templates/post_detail.html:193
+#: app/templates/user_popup.html:46
 msgid "Message"
-msgstr ""
+msgstr "Mensaje"
 
 #: app/main/routes.py:52
 msgid "Your post is now live!"
@@ -177,59 +218,67 @@ msgstr "¡No te puedes dejar de seguir a tí mismo!"
 msgid "You are not following %(username)s."
 msgstr "No estás siguiendo a %(username)s."
 
-#: app/main/routes.py:250
-#, fuzzy
+#: app/main/routes.py:184 app/main/routes.py:190
+msgid "Error: invalid translation request."
+msgstr "Error: solicitud de traduccion invalida."
+
+#: app/main/routes.py:257
 msgid "Your post has been deleted!"
-msgstr "Tu contraseña ha sido cambiada."
+msgstr "Tu publicacion ha sido eliminada."
 
-#: app/main/routes.py:277
-#, fuzzy
+#: app/main/routes.py:284
 msgid "Your comment has been published."
-msgstr "Tu contraseña ha sido cambiada."
+msgstr "Tu comentario ha sido publicado."
 
-#: app/main/routes.py:385
-#, fuzzy
+#: app/main/routes.py:392
 msgid "Your message has been sent."
-msgstr "Tu contraseña ha sido cambiada."
+msgstr "Tu mensaje ha sido enviado."
 
-#: app/main/routes.py:442
-#, fuzzy
+#: app/main/routes.py:432
+msgid "Please upload a JPG or PNG image."
+msgstr "Sube una imagen JPG o PNG."
+
+#: app/main/routes.py:449
+msgid "Please upload a valid image file."
+msgstr "Sube un archivo de imagen valido."
+
+#: app/main/routes.py:468
 msgid "Your avatar has been updated!"
-msgstr "Tu contraseña ha sido cambiada."
+msgstr "Tu avatar se ha actualizado."
 
-#: app/templates/_message.html:41 app/templates/base.html:155
+#: app/templates/_message.html:41 app/templates/base.html:169
 #: app/templates/post_detail.html:115
 msgid "Translate"
-msgstr ""
+msgstr "Traducir"
 
 #: app/templates/_post.html:11
 msgid "You"
-msgstr ""
+msgstr "Tu"
 
 #: app/templates/_post.html:21
 msgid "Delete"
-msgstr ""
+msgstr "Eliminar"
 
 #: app/templates/_post.html:28 app/templates/post_detail.html:11
 msgid "Untitled"
-msgstr ""
+msgstr "Sin titulo"
 
 #: app/templates/_post.html:38
 msgid "This post contains image content."
-msgstr ""
+msgstr "Esta publicacion contiene imagenes."
 
 #: app/templates/_post.html:45
 #, python-format
 msgid "Posted %(when)s"
-msgstr ""
+msgstr "Publicado %(when)s"
 
 #: app/templates/_post.html:48 app/templates/post_detail.html:63
 msgid "Comments"
-msgstr ""
+msgstr "Comentarios"
 
 #: app/templates/_post.html:51
 msgid "Read more"
-msgstr ""
+msgstr "Leer mas"
 
 #: app/templates/base.html:9
 msgid "Welcome to Microblog"
@@ -237,7 +286,7 @@ msgstr "Bienvenido a Microblog"
 
 #: app/templates/base.html:31 app/templates/index.html:7
 msgid "Your social space"
-msgstr ""
+msgstr "Tu espacio social"
 
 #: app/templates/base.html:62
 msgid "Login"
@@ -245,68 +294,84 @@ msgstr "Ingresar"
 
 #: app/templates/base.html:68 app/templates/messages.html:7
 msgid "Messages"
-msgstr ""
+msgstr "Mensajes"
 
 #: app/templates/base.html:77
 msgid "Account"
-msgstr ""
+msgstr "Cuenta"
 
 #: app/templates/base.html:81 app/templates/user.html:25
 msgid "Profile"
 msgstr "Perfil"
 
-#: app/templates/base.html:84
+#: app/templates/base.html:85
 msgid "Logout"
 msgstr "Salir"
 
-#: app/templates/base.html:128
+#: app/templates/base.html:100
+msgid "Strengthen your account security"
+msgstr "Refuerza la seguridad de tu cuenta"
+
+#: app/templates/base.html:101
+msgid ""
+"If this account has been used before, consider updating your password to "
+"keep it protected."
+msgstr ""
+"Si esta cuenta ya se ha usado antes, considera actualizar tu contrasena para"
+" protegerla."
+
+#: app/templates/base.html:105
+msgid "Dismiss"
+msgstr "Cerrar"
+
+#: app/templates/base.html:142
 msgid "Translating..."
-msgstr ""
-
-#: app/templates/base.html:146
-msgid "Show Original"
-msgstr ""
-
-#: app/templates/base.html:153
-msgid "Translation failed"
-msgstr ""
+msgstr "Traduciendo..."
 
 #: app/templates/base.html:160
-#, fuzzy
+msgid "Show Original"
+msgstr "Mostrar original"
+
+#: app/templates/base.html:167
+msgid "Translation failed"
+msgstr "La traduccion fallo"
+
+#: app/templates/base.html:174
 msgid "Retry"
-msgstr "Registrarse"
+msgstr "Reintentar"
+
+#: app/templates/base.html:200
+msgid "Loading..."
+msgstr "Cargando..."
 
 #: app/templates/conversation.html:6
 msgid "Private conversation"
-msgstr ""
+msgstr "Conversacion privada"
 
 #: app/templates/conversation.html:7
-#, fuzzy, python-format
+#, python-format
 msgid "Messages with %(username)s"
-msgstr "¡Hola, %(username)s!"
+msgstr "Mensajes con %(username)s"
 
 #: app/templates/conversation.html:15
-#, fuzzy
 msgid "No messages yet"
-msgstr "Artículos previos"
+msgstr "Aun no hay mensajes"
 
 #: app/templates/conversation.html:16
 msgid "Start the conversation by sending the first message."
-msgstr ""
+msgstr "Inicia la conversacion enviando el primer mensaje."
 
 #: app/templates/conversation.html:34 app/templates/messages.html:46
-#, fuzzy
 msgid "Newer messages"
-msgstr "Artículos siguientes"
+msgstr "Mensajes mas recientes"
 
 #: app/templates/conversation.html:39 app/templates/messages.html:49
-#, fuzzy
 msgid "Older messages"
-msgstr "Artículos previos"
+msgstr "Mensajes anteriores"
 
 #: app/templates/edit_profile.html:7
 msgid "Account settings"
-msgstr ""
+msgstr "Configuracion de la cuenta"
 
 #: app/templates/index.html:8
 #, python-format
@@ -315,222 +380,208 @@ msgstr "¡Hola, %(username)s!"
 
 #: app/templates/index.html:9
 msgid ""
-"Record ideas, publish updates, and stay connected with people who matter "
-"to you."
+"Record ideas, publish updates, and stay connected with people who matter to "
+"you."
 msgstr ""
+"Registra ideas, publica novedades y mantente conectado con las personas "
+"importantes para ti."
 
 #: app/templates/index.html:12
-#, fuzzy
 msgid "Create a post"
-msgstr "Artículos siguientes"
+msgstr "Crear publicacion"
 
 #: app/templates/index.html:14
-#, fuzzy
 msgid "Go explore"
 msgstr "Explorar"
 
 #: app/templates/index.html:15
-#, fuzzy
 msgid "View profile"
-msgstr "Editar Perfil"
+msgstr "Ver perfil"
 
 #: app/templates/index.html:19
 msgid "Today's dashboard"
-msgstr ""
+msgstr "Panel de hoy"
 
 #: app/templates/index.html:23 app/templates/index.html:64
-#, fuzzy
 msgid "Posts"
-msgstr "Artículos previos"
+msgstr "Publicaciones"
 
 #: app/templates/index.html:27 app/templates/index.html:56
-#, fuzzy
 msgid "Following"
-msgstr "Seguir"
+msgstr "Siguiendo"
 
 #: app/templates/index.html:31 app/templates/index.html:60
-#, fuzzy
 msgid "Followers"
-msgstr "Seguir"
+msgstr "Seguidores"
 
 #: app/templates/index.html:35
-#, fuzzy
 msgid "Unread messages"
-msgstr "Artículos siguientes"
+msgstr "Mensajes sin leer"
 
 #: app/templates/index.html:48
-#, fuzzy
 msgid "Your profile"
-msgstr "Editar tu perfil"
+msgstr "Tu perfil"
 
 #: app/templates/index.html:52
 msgid "Tell people a little bit about yourself."
-msgstr ""
+msgstr "Cuenta a los demas algo sobre ti."
 
 #: app/templates/index.html:68
-#, fuzzy
 msgid "Edit profile"
-msgstr "Editar Perfil"
+msgstr "Editar perfil"
 
 #: app/templates/index.html:69
-#, fuzzy
 msgid "My profile"
-msgstr "Perfil"
+msgstr "Mi perfil"
 
 #: app/templates/index.html:70 app/templates/messages.html:6
 msgid "Message center"
-msgstr ""
+msgstr "Centro de mensajes"
 
 #: app/templates/index.html:80
-#, fuzzy
 msgid "Share something new"
-msgstr "Dí algo"
+msgstr "Comparte algo nuevo"
 
 #: app/templates/index.html:81
 msgid "Write a title, share your thoughts, and add images with Markdown."
-msgstr ""
+msgstr "Escribe un titulo, comparte tus ideas y agrega imagenes con Markdown."
 
 #: app/templates/index.html:90
 msgid "Give your post a title..."
-msgstr ""
+msgstr "Dale un titulo a tu publicacion..."
 
 #: app/templates/index.html:98
 msgid "What's on your mind?"
-msgstr ""
+msgstr "Que tienes en mente?"
 
 #: app/templates/index.html:105
 msgid "Markdown supported. You can upload images from the editor toolbar."
-msgstr ""
+msgstr "Markdown compatible. Puedes subir imagenes desde la barra del editor."
 
 #: app/templates/index.html:115
 msgid "Community feed"
-msgstr ""
+msgstr "Feed de la comunidad"
 
 #: app/templates/index.html:116
 msgid "Latest updates"
-msgstr ""
+msgstr "Ultimas actualizaciones"
 
 #: app/templates/index.html:118
 msgid "items on this page"
-msgstr ""
+msgstr "elementos en esta pagina"
 
 #: app/templates/index.html:126
 msgid "Nothing here yet"
-msgstr ""
+msgstr "Aun no hay nada aqui"
 
 #: app/templates/index.html:127
 msgid "Once people you follow start posting, their updates will appear here."
-msgstr ""
+msgstr "Cuando las personas que sigues publiquen, sus novedades apareceran aqui."
 
 #: app/templates/index.html:133
-#, fuzzy
 msgid "Newer content"
-msgstr "Artículos siguientes"
+msgstr "Contenido mas reciente"
 
 #: app/templates/index.html:134
-#, fuzzy
 msgid "Older content"
-msgstr "Artículos previos"
+msgstr "Contenido anterior"
 
 #: app/templates/index.html:141
 msgid "Posting tips"
-msgstr ""
+msgstr "Consejos para publicar"
 
 #: app/templates/index.html:143
 msgid "Use Markdown to format longer thoughts."
-msgstr ""
+msgstr "Usa Markdown para dar formato a ideas mas largas."
 
 #: app/templates/index.html:144
 msgid "Keep titles short and clear for better readability."
-msgstr ""
+msgstr "Mant?n los titulos cortos y claros para mejorar la lectura."
 
 #: app/templates/index.html:145
 msgid "Add images when they make your post easier to understand."
-msgstr ""
+msgstr "Agrega imagenes cuando ayuden a entender mejor tu publicacion."
 
 #: app/templates/index.html:150
 msgid "Quick actions"
-msgstr ""
+msgstr "Acciones rapidas"
 
 #: app/templates/index.html:152
-#, fuzzy
 msgid "Discover posts"
-msgstr "Artículos previos"
+msgstr "Descubrir publicaciones"
 
 #: app/templates/index.html:153
-#, fuzzy
 msgid "Open messages"
-msgstr "Artículos previos"
+msgstr "Abrir mensajes"
 
 #: app/templates/index.html:154
-#, fuzzy
 msgid "Update profile"
-msgstr "Editar Perfil"
+msgstr "Actualizar perfil"
 
 #: app/templates/index.html:159
 msgid "Coming next"
-msgstr ""
+msgstr "Proximamente"
 
 #: app/templates/index.html:162
 msgid "Weekly recap"
-msgstr ""
+msgstr "Resumen semanal"
 
 #: app/templates/index.html:163
 msgid "A space reserved for future trending topics and recommendations."
-msgstr ""
+msgstr "Un espacio reservado para futuros temas populares y recomendaciones."
 
 #: app/templates/index.html:166
 msgid "Creator spotlight"
-msgstr ""
+msgstr "Creador destacado"
 
 #: app/templates/index.html:167
 msgid "You can plug recommendation data into this panel later."
-msgstr ""
+msgstr "Puedes conectar datos de recomendaciones a este panel mas adelante."
 
 #: app/templates/messages.html:35
 msgid "Chat"
-msgstr ""
+msgstr "Chatear"
 
 #: app/templates/messages.html:55
 msgid "No conversations yet"
-msgstr ""
+msgstr "Aun no hay conversaciones"
 
 #: app/templates/messages.html:56
 msgid "You have no private messages yet."
-msgstr ""
+msgstr "Aun no tienes mensajes privados."
 
 #: app/templates/post_detail.html:16
 msgid "Posted by"
-msgstr ""
+msgstr "Publicado por"
 
 #: app/templates/post_detail.html:56
 #, python-format
 msgid "Translate to %(language)s"
-msgstr ""
+msgstr "Traducir a %(language)s"
 
 #: app/templates/post_detail.html:71
 msgid "Leave a comment..."
-msgstr ""
+msgstr "Deja un comentario..."
 
 #: app/templates/post_detail.html:129
 msgid "Prev"
-msgstr ""
+msgstr "Anterior"
 
 #: app/templates/post_detail.html:132
 msgid "Next"
-msgstr ""
+msgstr "Siguiente"
 
 #: app/templates/post_detail.html:145
 msgid "About the Author"
-msgstr ""
+msgstr "Sobre el autor"
 
 #: app/templates/post_detail.html:184 app/templates/user.html:59
-#: app/templates/user_popup.html:15
+#: app/templates/user_popup.html:38
 msgid "Follow"
 msgstr "Seguir"
 
 #: app/templates/post_detail.html:189 app/templates/user.html:64
-#: app/templates/user_popup.html:22
+#: app/templates/user_popup.html:43
 msgid "Unfollow"
 msgstr "Dejar de seguir"
 
@@ -540,11 +591,11 @@ msgstr "Resultados de Búsqueda"
 
 #: app/templates/search.html:15
 msgid "No matching posts"
-msgstr ""
+msgstr "No hay publicaciones coincidentes"
 
 #: app/templates/search.html:16
 msgid "Try a different keyword or explore recent posts instead."
-msgstr ""
+msgstr "Prueba otra palabra clave o explora publicaciones recientes."
 
 #: app/templates/search.html:25 app/templates/user.html:100
 msgid "Newer posts"
@@ -556,27 +607,26 @@ msgstr "Artículos previos"
 
 #: app/templates/user.html:17
 msgid "Change Avatar"
-msgstr ""
+msgstr "Cambiar avatar"
 
 #: app/templates/user.html:30
 msgid "This user has not added a bio yet."
-msgstr ""
+msgstr "Este usuario aun no ha agregado una biografia."
 
 #: app/templates/user.html:37
-#, fuzzy
 msgid "Last seen"
-msgstr "Última visita"
+msgstr "Ultima vez visto"
 
 #: app/templates/user.html:43
 msgid "Community"
-msgstr ""
+msgstr "Comunidad"
 
-#: app/templates/user.html:45 app/templates/user_popup.html:9
+#: app/templates/user.html:45
 #, python-format
 msgid "%(count)d followers"
 msgstr "%(count)d seguidores"
 
-#: app/templates/user.html:46 app/templates/user_popup.html:9
+#: app/templates/user.html:46
 #, python-format
 msgid "%(count)d following"
 msgstr "siguiendo a %(count)d"
@@ -587,30 +637,56 @@ msgstr "Editar tu perfil"
 
 #: app/templates/user.html:70
 msgid "Send private message"
-msgstr ""
+msgstr "Enviar mensaje privado"
 
 #: app/templates/user.html:80
-#, fuzzy
 msgid "Recent posts"
-msgstr "Artículos siguientes"
+msgstr "Publicaciones recientes"
 
 #: app/templates/user.html:81
-#, fuzzy, python-format
+#, python-format
 msgid "Posts by %(username)s"
-msgstr "¡Hola, %(username)s!"
+msgstr "Publicaciones de %(username)s"
 
 #: app/templates/user.html:90
-#, fuzzy
 msgid "No posts yet"
-msgstr "Artículos previos"
+msgstr "Aun no hay publicaciones"
 
 #: app/templates/user.html:91
 msgid "Posts published by this user will appear here."
-msgstr ""
+msgstr "Las publicaciones de este usuario apareceran aqui."
 
-#: app/templates/user_popup.html:7
+#: app/templates/user_popup.html:11
+msgid "No profile text yet."
+msgstr "Aun no hay texto de perfil."
+
+#: app/templates/user_popup.html:18
 msgid "Last seen on"
 msgstr "Última visita"
+
+#: app/templates/user_popup.html:23
+msgid "Unknown"
+msgstr "Desconocido"
+
+#: app/templates/user_popup.html:28
+msgid "followers"
+msgstr "seguidores"
+
+#: app/templates/user_popup.html:29
+msgid "following"
+msgstr "siguiendo"
+
+#: app/templates/auth/change_password.html:7
+msgid "Account security"
+msgstr "Seguridad de la cuenta"
+
+#: app/templates/auth/change_password.html:9
+msgid ""
+"Use a strong password with at least 8 characters. Updating it periodically "
+"helps protect your account."
+msgstr ""
+"Usa una contrasena segura de al menos 8 caracteres. Actualizarla "
+"periodicamente ayuda a proteger tu cuenta."
 
 #: app/templates/auth/login.html:7
 msgid "New User?"

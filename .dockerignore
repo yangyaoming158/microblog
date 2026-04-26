@@ -1,0 +1,16 @@
+.git
+.gitignore
+.dockerignore
+
+venv/
+__pycache__/
+*.pyc
+
+.env
+.flaskenv
+app.db
+logs/
+*.log
+
+messages.pot
+app/translations/*/LC_MESSAGES/*.mo

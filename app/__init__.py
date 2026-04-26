@@ -16,7 +16,7 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_moment import Moment
 from flask_babel import Babel, lazy_gettext as _l
-from config import Config
+from config import get_config_class
 from elasticsearch import Elasticsearch
 
 
@@ -34,13 +34,16 @@ babel = Babel()
 
 # --- 第二步：创建【应用工厂函数】---
 # 这是组织 Flask 应用的最佳实践。
-def create_app(config_class=Config):
-    """
-    创建一个配置好的 Flask 应用实例。
-    """
-    # a. 创建 Flask 应用实例
+def create_app(config_class=None):
+    """Create a configured Flask application instance."""
     app = Flask(__name__)
-    # 从配置类中加载配置
+    if config_class is None:
+        config_class = get_config_class()
+    elif isinstance(config_class, str):
+        config_class = get_config_class(config_class)
+
+    if hasattr(config_class, 'validate'):
+        config_class.validate()
     app.config.from_object(config_class)
 
     # b. 使用 .init_app() 方法，将上面创建的扩展实例与 app 实例进行绑定

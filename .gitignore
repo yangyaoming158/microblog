@@ -19,3 +19,10 @@ app/translations/*/LC_MESSAGES/*.mo
 # IDE/Editor specific
 .vscode/
 .idea/
+
+# Runtime logs
+logs/
+*.log
+
+# User-uploaded runtime files
+app/static/avatars/*

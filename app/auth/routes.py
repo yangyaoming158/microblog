@@ -1,12 +1,12 @@
 from flask import render_template, redirect, url_for, flash, request
 from urllib.parse import urlsplit
-from flask_login import login_user, logout_user, current_user
+from flask_login import login_user, logout_user, current_user, login_required
 from flask_babel import _
 import sqlalchemy as sa
 from app import db
 from app.auth import bp
 from app.auth.forms import LoginForm, RegistrationForm, \
-    ResetPasswordRequestForm, ResetPasswordForm
+    ResetPasswordRequestForm, ResetPasswordForm, ChangePasswordForm
 from app.models import User
 from app.auth.email import send_password_reset_email
 
@@ -83,3 +83,19 @@ def reset_password(token):
         flash(_('Your password has been reset.'))
         return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', form=form)
+
+
+@bp.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if not current_user.check_password(form.current_password.data):
+            flash(_('Current password is incorrect.'))
+            return redirect(url_for('auth.change_password'))
+        current_user.set_password(form.password.data)
+        db.session.commit()
+        flash(_('Your password has been updated.'))
+        return redirect(url_for('main.index'))
+    return render_template('auth/change_password.html',
+                           title=_('Change Password'), form=form)

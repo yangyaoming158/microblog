@@ -13,7 +13,7 @@ from app.main import bp
 from app.main.forms import SearchForm,CommentForm
 import os
 from werkzeug.utils import secure_filename
-from PIL import Image
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 # g 对象： 是 Flask 提供的一个“请求全局”的存储空间
 # 它就像一个“背包”，在一个完整的请求-响应周期内，你可以往里面放任何东西，并在该周期的任何地方（比如视图函数、模板）取出来用
@@ -178,11 +178,18 @@ def unfollow(username):
 @bp.route('/translate', methods=['POST'])
 @login_required
 def translate_text():
-    data = request.get_json()
-    return {'text': translate(data['text'],
-                              data['source_language'],
-                              data['dest_language'])}
+    data = request.get_json(silent=True) or {}
+    required_fields = ('text', 'source_language', 'dest_language')
+    if not all(isinstance(data.get(field), str) for field in required_fields):
+        return {'text': _('Error: invalid translation request.')}, 400
 
+    text = data['text'].strip()
+    source_language = data['source_language'].strip()
+    dest_language = data['dest_language'].strip()
+    if not text or len(text) > 5000 or len(source_language) > 10 or len(dest_language) > 10:
+        return {'text': _('Error: invalid translation request.')}, 400
+
+    return {'text': translate(text, source_language, dest_language)}
 
 # 为了实现可分享的 URL (/search?q=...)，搜索功能必须通过 GET 请求处理。
 # 在后端，这意味着要从 request.args 获取数据，并使用 form.validate() 而不是 form.validate_on_submit()。
@@ -386,10 +393,9 @@ def conversation(username):
         # 提交后重定向到同一页面，刷新聊天记录
         return redirect(url_for('main.conversation', username=username))
     
-    # 访问此页面时，将与该用户的所有消息标记为已读
-    current_user.last_message_read_time = datetime.now(timezone.utc)
-    # 并且将未读消息通知清零
-    current_user.add_notification('unread_message_count', 0)
+    current_user.mark_conversation_read(user)
+    current_user.add_notification('unread_message_count',
+                                  current_user.unread_message_count())
     db.session.commit()
     
     # 【核心】查询你和这个 user 之间的所有消息
@@ -403,9 +409,9 @@ def conversation(username):
     
     messages = db.paginate(messages_query, page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
-    next_url = url_for('main.messages', page=messages.next_num) \
+    next_url = url_for('main.conversation', username=username, page=messages.next_num) \
         if messages.has_next else None
-    prev_url = url_for('main.messages', page=messages.prev_num) \
+    prev_url = url_for('main.conversation', username=username, page=messages.prev_num) \
         if messages.has_prev else None
     
     return render_template('conversation.html', title=f"Conversation with {username}",
@@ -418,30 +424,51 @@ def conversation(username):
 @login_required
 def change_avatar():
     form = ChangeAvatarForm()
-    if form.validate_on_submit():
-        if form.avatar.data:
-            # 这里的逻辑和之前 edit_profile 里的完全一样
-            random_hex = os.urandom(8).hex()
-            f_name, f_ext = os.path.splitext(form.avatar.data.filename)
-            avatar_fn = random_hex + f_ext
-            avatar_path = os.path.join(current_app.root_path, 'static/avatars', avatar_fn)
-            
-            # (可选) 删除旧头像文件以节省空间
-            if current_user.avatar_filename:
-                old_avatar_path = os.path.join(current_app.root_path, 'static/avatars', current_user.avatar_filename)
-                if os.path.exists(old_avatar_path):
-                    os.remove(old_avatar_path)
-            
-            output_size = (128, 128)
-            i = Image.open(form.avatar.data)
-            i.thumbnail(output_size)
-            i.save(avatar_path)
-            
-            current_user.avatar_filename = avatar_fn
-            db.session.commit()
-            flash(_('Your avatar has been updated!'))
-            # 上传成功后，重定向回用户主页
+    if form.validate_on_submit() and form.avatar.data:
+        avatar_file = form.avatar.data
+        ext = os.path.splitext(secure_filename(avatar_file.filename or ''))[1]
+        ext = ext.lower()
+        if ext not in {'.jpg', '.jpeg', '.png'}:
+            flash(_('Please upload a JPG or PNG image.'))
             return redirect(url_for('main.user', username=current_user.username))
-    
-    # 如果是 GET 请求，也重定向回用户主页，因为我们不在一个单独的页面上显示这个表单
+
+        try:
+            avatar_file.stream.seek(0)
+            image = Image.open(avatar_file.stream)
+            image.verify()
+            avatar_file.stream.seek(0)
+            image = Image.open(avatar_file.stream)
+            image = ImageOps.exif_transpose(image)
+            output_size = (512, 512)
+            image = ImageOps.fit(image, output_size, method=Image.Resampling.LANCZOS)
+            if ext in {'.jpg', '.jpeg'}:
+                image = image.convert('RGB')
+            else:
+                image = image.convert('RGBA')
+        except (UnidentifiedImageError, OSError, ValueError):
+            flash(_('Please upload a valid image file.'))
+            return redirect(url_for('main.user', username=current_user.username))
+
+        avatar_fn = os.urandom(8).hex() + ('.jpg' if ext == '.jpeg' else ext)
+        avatar_dir = os.path.join(current_app.root_path, 'static/avatars')
+        os.makedirs(avatar_dir, exist_ok=True)
+        avatar_path = os.path.join(avatar_dir, avatar_fn)
+        save_kwargs = {'quality': 92, 'optimize': True} if ext in {'.jpg', '.jpeg'} else {'optimize': True}
+        image.save(avatar_path, **save_kwargs)
+
+        old_avatar_filename = current_user.avatar_filename
+        current_user.avatar_filename = avatar_fn
+        db.session.commit()
+
+        if old_avatar_filename:
+            old_avatar_path = os.path.join(avatar_dir, old_avatar_filename)
+            if os.path.exists(old_avatar_path):
+                os.remove(old_avatar_path)
+
+        flash(_('Your avatar has been updated!'))
+        return redirect(url_for('main.user', username=current_user.username))
+
+    for errors in form.errors.values():
+        for error in errors:
+            flash(error)
     return redirect(url_for('main.user', username=current_user.username))

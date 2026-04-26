@@ -1,14 +1,15 @@
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 from app import create_app, db
-from app.models import User, Post, Message, Notification
+from app.models import User, Post, Message, Notification, ConversationReadState
 
 app = create_app()
 
 @app.shell_context_processor
 def make_shell_context():
     return {'sa': sa, 'so': so, 'db': db, 'User': User, 'Post': Post,
-            'Message': Message, 'Notification': Notification}
+            'Message': Message, 'Notification': Notification,
+            'ConversationReadState': ConversationReadState}
 # microblog.py: 应用程序的主入口点
 
 # 从我们自己创建的 'app' 包中，导入那个名为 'app' 的 Flask 应用实例。

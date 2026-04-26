@@ -1,27 +1,49 @@
-<div>
-  <img src="{{ user.avatar(64) }}" style="margin: 5px; float: left">
-  <p><a href="{{ url_for('main.user', username=user.username) }}">{{ user.username }}</a></p>
-  {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
-  <div class="clearfix"></div>
-  {% if user.last_seen %}
-  <p>{{ _('Last seen on') }}: {{ moment(user.last_seen).format('lll') }}</p>
-  {% endif %}
-  <p>{{ _('%(count)d followers', count=user.followers_count()) }}, {{ _('%(count)d following', count=user.following_count()) }}</p>
+<div class="user-popover-card">
+  <div class="user-popover-card__header">
+    <a href="{{ url_for('main.user', username=user.username) }}" class="user-popover-card__avatar-link">
+      <img src="{{ user.avatar(96) }}" alt="{{ user.username }}" class="user-popover-card__avatar">
+    </a>
+    <div class="user-popover-card__identity">
+      <a href="{{ url_for('main.user', username=user.username) }}" class="user-popover-card__name">{{ user.username }}</a>
+      {% if user.about_me %}
+      <p class="user-popover-card__bio">{{ user.about_me }}</p>
+      {% else %}
+      <p class="user-popover-card__bio user-popover-card__bio--muted">{{ _('No profile text yet.') }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="user-popover-card__meta">
+    <div class="user-popover-card__meta-item">
+      <span class="user-popover-card__meta-label">{{ _('Last seen on') }}</span>
+      <strong class="user-popover-card__meta-value">
+        {% if user.last_seen %}
+          {{ moment(user.last_seen).format('lll') }}
+        {% else %}
+          {{ _('Unknown') }}
+        {% endif %}
+      </strong>
+    </div>
+    <div class="user-popover-card__stats">
+      <span><strong>{{ user.followers_count() }}</strong> {{ _('followers') }}</span>
+      <span><strong>{{ user.following_count() }}</strong> {{ _('following') }}</span>
+    </div>
+  </div>
+
   {% if user != current_user %}
+  <div class="user-popover-card__actions">
     {% if not current_user.is_following(user) %}
-    <p>
-      <form action="{{ url_for('main.follow', username=user.username) }}" method="post">
-        {{ form.hidden_tag() }}
-        {{ form.submit(value=_('Follow'), class_='btn btn-outline-primary btn-sm') }}
-      </form>
-    </p>
+    <form action="{{ url_for('main.follow', username=user.username) }}" method="post">
+      {{ form.hidden_tag() }}
+      {{ form.submit(value=_('Follow'), class_='btn btn-primary btn-sm user-popover-card__button') }}
+    </form>
     {% else %}
-    <p>
-      <form action="{{ url_for('main.unfollow', username=user.username) }}" method="post">
-        {{ form.hidden_tag() }}
-        {{ form.submit(value=_('Unfollow'), class_='btn btn-outline-primary btn-sm') }}
-      </form>
-    </p>
+    <form action="{{ url_for('main.unfollow', username=user.username) }}" method="post">
+      {{ form.hidden_tag() }}
+      {{ form.submit(value=_('Unfollow'), class_='btn btn-outline-secondary btn-sm user-popover-card__button user-popover-card__button--secondary') }}
+    </form>
     {% endif %}
+    <a href="{{ url_for('main.conversation', username=user.username) }}" class="btn btn-sm user-popover-card__message">{{ _('Message') }}</a>
+  </div>
   {% endif %}
 </div>

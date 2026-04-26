@@ -20,7 +20,7 @@
     {% set home_active = endpoint == 'main.index' %}
     {% set explore_active = endpoint == 'main.explore' %}
     {% set messages_active = endpoint in ['main.messages', 'main.conversation'] %}
-    {% set account_active = endpoint in ['main.user', 'main.edit_profile'] %}
+    {% set account_active = endpoint in ['main.user', 'main.edit_profile', 'auth.change_password'] %}
     <header class="site-header">
       <nav class="navbar navbar-expand-lg site-navbar">
         <div class="page-shell site-navbar__inner">
@@ -80,6 +80,7 @@
                 <ul class="dropdown-menu dropdown-menu-end profile-dropdown-menu">
                   <li><a class="dropdown-item" href="{{ url_for('main.user', username=current_user.username) }}">{{ _('Profile') }}</a></li>
                   <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">{{ _('Edit Profile') }}</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}">{{ _('Change Password') }}</a></li>
                   <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a></li>
                 </ul>
@@ -92,6 +93,19 @@
     </header>
 
     <main class="page-shell page-content">
+      {% if current_user.is_authenticated and endpoint != 'auth.change_password' %}
+      <section class="security-nudge surface-card" id="security-nudge" aria-label="Account security reminder">
+        <div class="security-nudge__icon" aria-hidden="true">!</div>
+        <div class="security-nudge__copy">
+          <strong>{{ _('Strengthen your account security') }}</strong>
+          <span>{{ _('If this account has been used before, consider updating your password to keep it protected.') }}</span>
+        </div>
+        <div class="security-nudge__actions">
+          <a class="btn security-nudge__primary" href="{{ url_for('auth.change_password') }}">{{ _('Change Password') }}</a>
+          <button class="security-nudge__dismiss" type="button" aria-label="{{ _('Dismiss') }}" data-dismiss-security-nudge>&times;</button>
+        </div>
+      </section>
+      {% endif %}
       {% with messages = get_flashed_messages() %}
         {% if messages %}
         <section class="flash-stack" aria-label="Notifications">
@@ -165,33 +179,51 @@
       window.addEventListener('load', updateHeaderOffset);
       window.addEventListener('resize', updateHeaderOffset);
 
+      function renderPopoverMoments(popoverTrigger) {
+        const popoverId = popoverTrigger.getAttribute('aria-describedby');
+        const popoverElem = popoverId ? document.getElementById(popoverId) : null;
+        if (!popoverElem) {
+          return;
+        }
+        popoverElem.querySelectorAll('.flask-moment').forEach(function(momentElem) {
+          flask_moment_render(momentElem);
+        });
+      }
+
       function initialize_popovers() {
         const popups = document.getElementsByClassName('user_popup');
         for (let i = 0; i < popups.length; i++) {
-          new bootstrap.Popover(popups[i], {
-            content: 'Loading...',
+          const trigger = popups[i];
+          trigger.dataset.username = trigger.dataset.username || trigger.textContent.trim();
+          new bootstrap.Popover(trigger, {
+            content: function() {
+              return trigger.dataset.popupContent || '<div class="user-popover-loading">{{ _('Loading...') }}</div>';
+            },
             trigger: 'hover focus',
             placement: 'right',
             html: true,
             sanitize: false,
-            delay: {show: 500, hide: 0},
-            container: popups[i],
-            customClass: 'd-inline'
+            delay: {show: 500, hide: 80},
+            container: 'body',
+            customClass: 'user-popover-shell'
           });
 
-          popups[i].addEventListener('show.bs.popover', async (ev) => {
+          trigger.addEventListener('inserted.bs.popover', function(ev) {
+            renderPopoverMoments(ev.target);
+          });
+
+          trigger.addEventListener('show.bs.popover', async (ev) => {
             if (ev.target.popupLoaded) {
               return;
             }
-            const response = await fetch('/user/' + ev.target.innerText.trim() + '/popup');
+            const response = await fetch('/user/' + encodeURIComponent(ev.target.dataset.username) + '/popup');
             const data = await response.text();
             const popover = bootstrap.Popover.getInstance(ev.target);
             if (popover && data) {
               ev.target.popupLoaded = true;
+              ev.target.dataset.popupContent = data;
               popover.setContent({'.popover-body': data});
-              setTimeout(function() {
-                flask_moment_render_all();
-              }, 0);
+              renderPopoverMoments(ev.target);
             }
           });
         }
@@ -231,6 +263,19 @@
       document.addEventListener('DOMContentLoaded', initialize_notifications);
       {% endif %}
 
+      const securityNudge = document.getElementById('security-nudge');
+      if (securityNudge && sessionStorage.getItem('securityNudgeDismissed') === '1') {
+        securityNudge.remove();
+      }
+      document.querySelectorAll('[data-dismiss-security-nudge]').forEach(function(button) {
+        button.addEventListener('click', function() {
+          sessionStorage.setItem('securityNudgeDismissed', '1');
+          const nudge = document.getElementById('security-nudge');
+          if (nudge) {
+            nudge.remove();
+          }
+        });
+      });
       const avatarUpload = document.getElementById('avatar-upload');
       if (avatarUpload) {
         avatarUpload.addEventListener('change', function() {

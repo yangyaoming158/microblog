@@ -28,6 +28,9 @@ class User(UserMixin, db.Model):
     email: so.Mapped[str] = so.mapped_column(sa.String(120), index=True,
                                              unique=True)
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
+    is_active: so.Mapped[bool] = so.mapped_column(
+        sa.Boolean, default=True, server_default=sa.true(), nullable=False)
+    activation_token: so.Mapped[Optional[str]] = so.mapped_column(sa.String(128))
 
     about_me: so.Mapped[Optional[str]] = so.mapped_column(sa.String(140))
 
@@ -69,6 +72,9 @@ class User(UserMixin, db.Model):
     # 【新增关系】一个用户可以有多条通知
     notifications: so.WriteOnlyMapped['Notification'] = so.relationship(
         back_populates='user')
+    conversation_read_states: so.WriteOnlyMapped['ConversationReadState'] = so.relationship(
+        foreign_keys='ConversationReadState.user_id',
+        back_populates='user', cascade='all, delete-orphan')
 
     
     def __repr__(self):
@@ -143,55 +149,59 @@ class User(UserMixin, db.Model):
         return db.session.get(User, id)
     
     # 【新增方法】计算未读消息的数量
+    def _conversation_read_state(self, peer):
+        query = sa.select(ConversationReadState).where(
+            ConversationReadState.user_id == self.id,
+            ConversationReadState.peer_id == peer.id)
+        state = db.session.scalar(query)
+        if state is None:
+            state = ConversationReadState(
+                user=self, peer=peer,
+                last_read_time=self.last_message_read_time)
+            db.session.add(state)
+        return state
+
+    def conversation_last_read_time(self, peer):
+        query = sa.select(ConversationReadState.last_read_time).where(
+            ConversationReadState.user_id == self.id,
+            ConversationReadState.peer_id == peer.id)
+        last_read_time = db.session.scalar(query)
+        return last_read_time or self.last_message_read_time or datetime(1900, 1, 1)
+
+    def mark_conversation_read(self, peer, read_time=None):
+        state = self._conversation_read_state(peer)
+        state.last_read_time = read_time or datetime.now(timezone.utc)
+        return state
+
     def unread_message_count(self):
-        # 获取用户上次读取消息的时间。如果是新用户 (值为 None)，
-        # 就使用一个非常早的时间 (1900年) 作为起点。
-        last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
-        # 构建查询：
-        # 查找所有【接收者是我】(Message.recipient == self) 并且
-        # 【消息时间戳晚于我上次读取时间】(Message.timestamp > last_read_time) 的消息。
-        query = sa.select(Message).where(Message.recipient == self,
-                                         Message.timestamp > last_read_time)
-        # 在上面的查询基础上，只计算数量 (COUNT)，而不是获取消息本身，这样更高效。
-        return db.session.scalar(sa.select(sa.func.count()).select_from(
-            query.subquery()))
-    
-    # 【新增方法】添加或更新一条通知
-    #  写入通知时调用
+        read_state = so.aliased(ConversationReadState)
+        fallback_read_time = self.last_message_read_time or datetime(1900, 1, 1)
+        query = (
+            sa.select(sa.func.count(Message.id))
+            .outerjoin(read_state, sa.and_(
+                read_state.user_id == self.id,
+                read_state.peer_id == Message.sender_id))
+            .where(
+                Message.recipient_id == self.id,
+                Message.timestamp > sa.func.coalesce(
+                    read_state.last_read_time, fallback_read_time)))
+        return db.session.scalar(query) or 0
+
     def add_notification(self, name, data):
-        # 先删除同名的旧通知，以实现“更新”的效果
         db.session.execute(self.notifications.delete().where(
             Notification.name == name))
-        # 创建一条新通知
-        # 将data中的纯数据转换为json形式
-        # data不一定是数字
-        # 例如将 1 转换为{"count": 1}
         n = Notification(name=name, payload_json=json.dumps(data), user=self)
         db.session.add(n)
         return n
-    # 【新增方法】计算来自特定用户的未读消息数
-    def new_messages_from(self, sender):
-        """
-        计算当前用户收到的、来自 'sender' 用户且未读的消息数量。
-        """
-        # 1. 获取最后一次读取时间 (如果没有则默认为很久以前)
-        last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
-        
-        # 2. 构建查询
-        #    - Message.recipient == self: 接收者必须是我
-        #    - Message.sender_id == sender.id: 发送者必须是指定的那个用户
-        #    - Message.timestamp > last_read_time: 消息时间必须晚于我上次读消息的时间
-        query = sa.select(Message).where(
-            Message.recipient == self,
-            Message.sender_id == sender.id,  # 【关键差异点】
-            Message.timestamp > last_read_time
-        )
-        
-        # 3. 执行计数查询并返回
-        return db.session.scalar(sa.select(sa.func.count()).select_from(
-            query.subquery()))
 
-    
+    def new_messages_from(self, sender):
+        last_read_time = self.conversation_last_read_time(sender)
+        query = sa.select(sa.func.count(Message.id)).where(
+            Message.recipient_id == self.id,
+            Message.sender_id == sender.id,
+            Message.timestamp > last_read_time)
+        return db.session.scalar(query) or 0
+
 
 @login.user_loader
 def load_user(id):
@@ -441,6 +451,29 @@ class Message(db.Model):
 
     def __repr__(self):
         return '<Message {}>'.format(self.body)
+
+
+class ConversationReadState(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    user_id: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey(User.id), index=True)
+    peer_id: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey(User.id), index=True)
+    last_read_time: so.Mapped[Optional[datetime]] = so.mapped_column(
+        index=True)
+
+    user: so.Mapped[User] = so.relationship(
+        foreign_keys=[user_id], back_populates='conversation_read_states')
+    peer: so.Mapped[User] = so.relationship(foreign_keys=[peer_id])
+
+    __table_args__ = (
+        sa.UniqueConstraint('user_id', 'peer_id',
+                            name='uq_conversation_read_state_user_peer'),
+    )
+
+    def __repr__(self):
+        return '<ConversationReadState user={} peer={}>'.format(
+            self.user_id, self.peer_id)
 
 
 class Notification(db.Model):
